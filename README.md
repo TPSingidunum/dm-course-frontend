@@ -1,131 +1,132 @@
-# dm-frontend — Nuxt prodavnica za kurs „Digitalni marketing i ML”
+# dm-course-frontend — Nuxt store for the "Digital Marketing & ML" course
 
-Frontend demo prodavnice iz kursa **Digitalni marketing i mašinsko učenje** (12 dana).
-Ovo je *samo* Nuxt aplikacija — da studenti vide kako izgleda kod u praksi:
-katalog, korpa, praćenje događaja (tracking) i admin panel koji prikazuje rezultate ML modela
-(segmentacija, konverzija, kampanje, preporuke, AI sadržaj).
+The frontend of the demo store from the **Digital Marketing and Machine Learning** course (12 days).
+This is *only* the Nuxt application — so students can see what the code looks like in practice:
+a catalog, a cart, event tracking and an admin panel that shows the results of the ML models
+(segmentation, conversion, campaigns, recommendations, AI content).
 
-> Backend (dm-ml FastAPI), lekcije, beležnice i podaci su u monorepo-u:
+> The backend (dm-ml FastAPI), lessons, notebooks and data live in the monorepo:
 > **https://github.com/TeodorPetrovic/dm-course-monorepo**
 
-![Početna](docs/screenshots/home.png)
+![Homepage](docs/screenshots/home.png)
 
-## Tehnologije
+## Tech stack
 
-| Sloj | Alat |
+| Layer | Tool |
 |---|---|
 | Framework | [Nuxt 4](https://nuxt.com) (Vue 3, file-based routing, Nitro server) |
-| Runtime / paket menadžer | [Bun](https://bun.sh) (Nitro preset `bun`) |
-| UI | [@nuxt/ui](https://ui.nuxt.com) 4, @nuxt/image, Tailwind (kroz Nuxt UI) |
-| Baza | MariaDB / MySQL preko [Drizzle ORM](https://orm.drizzle.team) + `mysql2` |
-| Validacija | zod |
-| ML API | dm-ml (FastAPI, Python) — poseban servis na `:3001`, proksiran kroz `/ml/**` |
+| Runtime / package manager | [Bun](https://bun.sh) (Nitro preset `bun`) |
+| UI | [@nuxt/ui](https://ui.nuxt.com) 4, @nuxt/image, Tailwind (via Nuxt UI) |
+| Database | MariaDB / MySQL via [Drizzle ORM](https://orm.drizzle.team) + `mysql2` |
+| Validation | zod |
+| ML API | dm-ml (FastAPI, Python) — a separate service on `:3001`, proxied through `/ml/**` |
 
-## Struktura
+## Structure
 
 ```
-app/                      # sve što ide u browser (Vue)
-  pages/                  # rute (file-based routing)
-    index.vue             #   /                — početna sa marketing modulima (Dan 12)
-    shop/index.vue        #   /shop            — katalog, personalizovan poredak „For you” (Dan 8)
-    product/[slug].vue    #   /product/:slug   — detalj + preporuke: content (5), collaborative (6),
-                          #                      session (9), semantic (10), AI opis (11/12)
+app/                      # everything that runs in the browser (Vue)
+  pages/                  # routes (file-based routing)
+    index.vue             #   /                — homepage with marketing modules (Day 12)
+    shop/index.vue        #   /shop            — catalog, personalized "For you" ordering (Day 8)
+    product/[slug].vue    #   /product/:slug   — detail + recommendations: content (5), collaborative (6),
+                          #                      session (9), semantic (10), AI description (11/12)
     category/             #   /category, /category/:slug
-    search.vue            #   /search?q=       — semantička pretraga (Dan 10)
+    search.vue            #   /search?q=       — semantic search (Day 10)
     admin/                #   admin panel (layout admin.vue)
-      event/              #     događaji iz baze (Dan 1 — event tracking)
-      segments/           #     RFM / k-means segmenti (Dan 2)
-      conversion/         #     predikcija konverzije (Dan 3)
-      campaigns/          #     ciljanje kampanja, pravilo vs ML (Dan 4)
-      recommendations/    #     evaluacija preporuka + CTR (Dani 7, 9), hybrid.vue (Dan 8)
-      ai/                 #     generisanje SEO/opisa (Dan 11)
-      marketing/          #     marketing moduli (Dan 12)
-      product/, category/ #     klasičan CRUD nad bazom
-  components/             # rec/Section.vue (kartice preporuka), MlUnavailable.vue, Delete dijalozi
+      event/              #     events from the database (Day 1 — event tracking)
+      segments/           #     RFM / k-means segments (Day 2)
+      conversion/         #     conversion prediction (Day 3)
+      campaigns/          #     campaign targeting, rule vs ML (Day 4)
+      recommendations/    #     recommendation evaluation + CTR (Days 7, 9), hybrid.vue (Day 8)
+      ai/                 #     SEO/description generation (Day 11)
+      marketing/          #     marketing modules (Day 12)
+      product/, category/ #     classic CRUD over the database
+  components/             # rec/Section.vue (recommendation cards), MlUnavailable.vue, Delete dialogs
   composables/
-    trackEvent.ts         # trackEvent(): 8 tipova događaja → POST /api/event/track (Dan 1)
-    useMl.ts              # mlGet/mlPost (greška → null, stranica se ne ruši), katalog, formatPrice
-  layouts/                # default.vue (prodavnica), admin.vue (sidebar)
-  types/                  # TS tipovi Product, Category
-server/                   # Nitro (radi na serveru)
+    trackEvent.ts         # trackEvent(): 8 event types → POST /api/event/track (Day 1)
+    useMl.ts              # mlGet/mlPost (error → null, the page never crashes), catalog, formatPrice
+  layouts/                # default.vue (store), admin.vue (sidebar)
+  types/                  # TS types Product, Category
+server/                   # Nitro (runs on the server)
   api/                    # REST: /api/shop, /api/product/*, /api/category/*, /api/event/*
   database/
     connection.ts         # mysql2 pool + Drizzle (DB_* env)
-    schemas/*.schema.ts   # Drizzle šeme: product, category, seo, event, user
+    schemas/*.schema.ts   # Drizzle schemas: product, category, seo, event, user
   routes/ml/[...path].ts  # proxy /ml/** → dm-ml API (NUXT_ML_API_URL)
-  utils/                  # dbHandler (503 kad baza ne radi), ml.ts (forward događaja), productWithSeo
-db/                       # schema.sql + seed.sql (sintetički podaci: 12 kategorija, 252 proizvoda, 500 događaja)
-docker-compose.yml        # lokalna MariaDB na 127.0.0.1:3307
+  utils/                  # dbHandler (503 when the DB is down), ml.ts (event forwarding), productWithSeo
+db/                       # schema.sql + seed.sql (synthetic data: 12 categories, 252 products, 500 events)
+docker-compose.yml        # local MariaDB on 127.0.0.1:3307
 scripts/smoke.py          # end-to-end test (Playwright)
-docs/screenshots/         # slike za ovaj README
+docs/screenshots/         # images for this README
 ```
 
-Komentari `// TEACH dNN: … // /TEACH` u kodu označavaju delove koji se pišu uživo na času
-dana *NN* (vidi `teaching/` u monorepo-u). Na aplikaciju ne utiču.
+Comments of the form `// TEACH dNN: … // /TEACH` in the code mark the parts that are written live in class
+on day *NN* (see `teaching/` in the monorepo). They have no effect on the app. Code comments and UI strings
+are in Serbian, the language the course is taught in.
 
-## Pokretanje
+## Running it
 
-Preduslovi: **Bun ≥ 1.2**, **Docker** (za bazu), opciono Python 3.11+ za dm-ml API.
+Prerequisites: **Bun ≥ 1.2**, **Docker** (for the database), optionally Python 3.11+ for the dm-ml API.
 
 ```bash
-cp .env.example .env          # po želji; podrazumevane vrednosti rade bez .env
-docker compose up -d          # MariaDB sa šemom i seed podacima (127.0.0.1:3307)
+cp .env.example .env          # optional; the defaults work without a .env
+docker compose up -d          # MariaDB with schema and seed data (127.0.0.1:3307)
 bun install
 bun run dev                   # http://localhost:3000
 ```
 
-Produkcijski build: `bun run build && bun .output/server/index.mjs`.
+Production build: `bun run build && bun .output/server/index.mjs`.
 
-### Promenljive okruženja
+### Environment variables
 
-| Promenljiva | Podrazumevano | Opis |
+| Variable | Default | Description |
 |---|---|---|
-| `NUXT_ML_API_URL` | `http://127.0.0.1:3001` | bazni URL dm-ml API-ja (runtime, bez rebuild-a) |
-| `DB_HOST` / `DB_PORT` | `127.0.0.1` / `3307` | lokalna MariaDB |
-| `DB_NAME` / `DB_USER` / `DB_PASSWORD` | `dm_local` | lažni lokalni demo kredencijali — nikad prava baza |
-| `PORT` | `3000` | port produkcijskog servera |
+| `NUXT_ML_API_URL` | `http://127.0.0.1:3001` | base URL of the dm-ml API (runtime, no rebuild needed) |
+| `DB_HOST` / `DB_PORT` | `127.0.0.1` / `3307` | local MariaDB |
+| `DB_NAME` / `DB_USER` / `DB_PASSWORD` | `dm_local` | fake local demo credentials — never a real database |
+| `PORT` | `3000` | port of the production server |
 
-### Baza podataka
+### Database
 
-`docker compose up -d` pri prvom pokretanju učitava `db/schema.sql` i `db/seed.sql`.
-Reset na početno stanje: `docker compose down -v && docker compose up -d`.
-Bez Dockera: napravi bazu i korisnika `dm_local` u bilo kojoj lokalnoj MariaDB/MySQL 8 i
-`mysql -udm_local -p dm_local < db/schema.sql && mysql -udm_local -p dm_local < db/seed.sql`, pa podesi `DB_*`.
+On first start, `docker compose up -d` loads `db/schema.sql` and `db/seed.sql`.
+Reset to the initial state: `docker compose down -v && docker compose up -d`.
+Without Docker: create a `dm_local` database and user in any local MariaDB/MySQL 8, run
+`mysql -udm_local -p dm_local < db/schema.sql && mysql -udm_local -p dm_local < db/seed.sql`, then set `DB_*`.
 
-Ako baza nije pokrenuta, `/api/*` vraća **503 „Database unavailable”** sa uputstvom umesto pada servera.
+If the database is not running, `/api/*` returns **503 "Database unavailable"** with instructions instead of crashing the server.
 
-## Kako frontend priča sa dm-ml API-jem
+## How the frontend talks to the dm-ml API
 
 ```
 Browser ──/ml/segments──▶ Nuxt (server/routes/ml/[...path].ts) ──▶ dm-ml :3001/segments
-Browser ──POST /api/event/track──▶ Nuxt ──▶ upis u MariaDB (event) ──▶ forward na dm-ml /events (best-effort)
+Browser ──POST /api/event/track──▶ Nuxt ──▶ insert into MariaDB (event) ──▶ forward to dm-ml /events (best-effort)
 ```
 
-* Sve ML stranice zovu `/ml/...` (isti origin, bez CORS-a); server ih prosleđuje na `NUXT_ML_API_URL`.
-* Ako dm-ml ne radi, proxy vraća **502**; `useMl()` vraća `null` i stranice prikazuju podrazumevani
-  sadržaj ili poruku „dm-ml nije dostupan” — prodavnica i tracking rade i dalje.
-* dm-ml pokrećeš iz monorepo-a:
+* All ML pages call `/ml/...` (same origin, no CORS); the server forwards them to `NUXT_ML_API_URL`.
+* If dm-ml is down, the proxy returns **502**; `useMl()` returns `null` and pages show default content
+  or a "dm-ml nije dostupan" (dm-ml unavailable) notice — the store and tracking keep working.
+* Start dm-ml from the monorepo:
   ```bash
   git clone https://github.com/TeodorPetrovic/dm-course-monorepo && cd dm-course-monorepo
   scripts/setup.sh && cd apps/api && .venv/bin/uvicorn app.main:app --port 3001
   ```
-* Demo korisnik je `user_id = 395` (`DEMO_USER_ID` u `trackEvent.ts`), sesija se čuva u `localStorage`.
+* The demo user is `user_id = 395` (`DEMO_USER_ID` in `trackEvent.ts`); the session is stored in `localStorage`.
 
-## Test
+## Tests
 
 ```bash
 bun run build
-DM_ML_DIR=../dm-course-monorepo/apps/api $DM_ML_DIR/.venv/bin/python scripts/smoke.py   # 42 provere
+DM_ML_DIR=../dm-course-monorepo/apps/api $DM_ML_DIR/.venv/bin/python scripts/smoke.py   # 42 checks
 ```
 
-## Slike
+## Screenshots
 
-| Prodavnica | Proizvod + preporuke | Admin: događaji |
+| Store | Product + recommendations | Admin: events |
 |---|---|---|
 | ![shop](docs/screenshots/shop.png) | ![product](docs/screenshots/product.png) | ![events](docs/screenshots/admin-event.png) |
 
-Slike proizvoda nisu deo repoa (seed sadrži samo putanje), pa se prikazuju prazni okviri.
+Product images are not part of the repo (the seed only contains paths), so empty frames are shown.
 
-## Licenca
+## License
 
 [MIT](LICENSE) © 2026 Teodor Petrović

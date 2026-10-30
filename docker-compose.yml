@@ -1,5 +1,5 @@
-# Lokalna MariaDB za demo (samo za razvoj!). Kredencijali su lažni demo vrednosti.
-# Pokretanje:  docker compose up -d     Reset:  docker compose down -v && docker compose up -d
+# Local MariaDB for the demo (development only!). The credentials are fake demo values.
+# Start:  docker compose up -d     Reset:  docker compose down -v && docker compose up -d
 services:
   db:
     image: mariadb:11
