@@ -1,4 +1,4 @@
-// Pozivi dm-ml kroz Nitro proxy /ml/** -> :3001. Graceful fallback: greška -> null (stranica se ne ruši).
+// dm-ml calls through the Nitro proxy /ml/** -> :3001. Graceful fallback: error -> null (the page never crashes).
 import type { Product, Rec } from '~/types/Product'
 
 export async function mlGet<T = any>(path: string): Promise<T | null> {
@@ -18,14 +18,14 @@ export async function mlPost<T = any>(path: string, body: unknown = {}): Promise
     }
 }
 
-// Katalog iz lokalne baze (slug, slika, cena) — dopunjava preporuke koje vraćaju samo product_id/name.
+// Catalog from the local database (slug, image, price) — enriches recommendations that only return product_id/name.
 const catalog = ref<Record<number, Product>>({})
 export async function useCatalog() {
     if (!Object.keys(catalog.value).length) {
         try {
             const rows = await $fetch<Product[]>("/api/shop")
             catalog.value = Object.fromEntries(rows.map(p => [p.product_id, p]))
-        } catch { /* bez kataloga: preporuke se prikazuju samo sa imenom */ }
+        } catch { /* no catalog: recommendations are shown with their name only */ }
     }
     return catalog
 }

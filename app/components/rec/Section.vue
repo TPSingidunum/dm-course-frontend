@@ -1,4 +1,4 @@
-<!-- Sekcija preporuka: loguje impresije (jednom) i klikove sa recommendation_source + pozicijom (Day 1/9). -->
+<!-- Recommendation section: logs impressions (once) and clicks with recommendation_source + position (Day 1/9). -->
 <template>
   <div v-if="items.length" class="mt-10" :data-testid="`rec-${source}`">
     <div class="flex items-center gap-2 mb-4">

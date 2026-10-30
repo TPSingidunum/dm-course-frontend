@@ -1,4 +1,4 @@
-<!-- Day 8: shop grid sa Default / Personalized poretkom (hybrid preporuke za demo korisnika). -->
+<!-- Day 8: shop grid with Default / Personalized ordering (hybrid recommendations for the demo user). -->
 <template>
   <div>
     <div class="flex items-center justify-center gap-4 py-5">
@@ -10,7 +10,7 @@
       </UButtonGroup>
       <UInput v-model.number="userId" type="number" class="w-28" @change="loadRecs" />
       <span class="text-sm text-muted" data-testid="shop-status">
-        <template v-if="recIds.length">user {{ userId }} · {{ recIds.length }} preporučenih · pomereno {{ moved }}</template>
+        <template v-if="recIds.length">user {{ userId }} · {{ recIds.length }} recommended · moved {{ moved }}</template>
         <template v-else>{{ recNote }}</template>
       </span>
     </div>
@@ -44,27 +44,23 @@ const products: Product[] = await $fetch("/api/shop");
 const mode = ref<'default' | 'personalized'>('default')
 const userId = ref(DEMO_USER_ID)
 const recIds = ref<number[]>([])
-const recNote = ref("personalizacija se učitava…")
+const recNote = ref("loading personalization…")
 
 async function loadRecs() {
-  // TEACH d08: hybrid preporuke za korisnika -> lista ID-jeva + impresije
   setDemoUserId(userId.value)
   const r = await mlGet<any>(`/recommendations/${userId.value}?limit=10`)
-  if (!r) { recIds.value = []; recNote.value = "dm-ml nedostupan — default poredak"; mode.value = 'default'; return }
+  if (!r) { recIds.value = []; recNote.value = "dm-ml unavailable — default order"; mode.value = 'default'; return }
   recIds.value = (r.recommendations || []).map((x: any) => x.product_id)
   if (r.fallback) recNote.value = `fallback: ${r.fallback_reason}`
   recIds.value.forEach((id, i) => trackRecommendationImpression(id, "hybrid", i + 1))
-  // /TEACH
 }
 onMounted(async () => { userId.value = getDemoUserId(); await loadRecs() })
 
 const ordered = computed(() => {
   if (mode.value === 'default' || !recIds.value.length) return products
-  // TEACH d08: personalizovan poredak (preporučeni prvi, ostali zadržavaju redosled)
   const pos = new Map(recIds.value.map((id, i) => [id, i]))
   const rec = products.filter(p => pos.has(p.product_id)).sort((a, b) => pos.get(a.product_id)! - pos.get(b.product_id)!)
   return [...rec, ...products.filter(p => !pos.has(p.product_id))]
-  // /TEACH
   return products
 })
 const moved = computed(() => ordered.value.filter((p, i) => products[i]?.product_id !== p.product_id).length)

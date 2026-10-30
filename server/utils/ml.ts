@@ -1,4 +1,4 @@
-// Server-side poziv dm-ml API-ja (best-effort). Bazni URL: runtimeConfig.mlApiUrl (env NUXT_ML_API_URL).
+// Server-side dm-ml API call (best-effort). Base URL: runtimeConfig.mlApiUrl (env NUXT_ML_API_URL).
 export function mlApiUrl(): string {
     return String(useRuntimeConfig().mlApiUrl || "http://127.0.0.1:3001").replace(/\/$/, "")
 }

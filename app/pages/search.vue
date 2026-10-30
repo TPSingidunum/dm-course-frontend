@@ -1,4 +1,4 @@
-<!-- Day 10: semantička pretraga (GET /ml/search/semantic?q=...) -->
+<!-- Day 10: semantic search (GET /ml/search/semantic?q=...) -->
 <template>
   <div class="px-10 py-6">
     <h1 class="text-2xl font-bold mb-4">Search</h1>
@@ -32,13 +32,11 @@ const q = ref(String(route.query.q || ""))
 const res = ref<any>(null); const error = ref(""); const results = ref<Rec[]>([]); const embedder = ref("")
 async function search() {
   if (!q.value.trim()) return
-  // TEACH d10: semantička pretraga (GET /search/semantic)
   await trackSearchEvent()
   const r = await mlGet<any>(`/search/semantic?q=${encodeURIComponent(q.value)}&limit=10`)
-  if (!r) { error.value = "dm-ml nedostupan — pretraga trenutno ne radi"; results.value = []; return }
+  if (!r) { error.value = "dm-ml unavailable — search is currently not working"; results.value = []; return }
   error.value = ""; res.value = r; results.value = enrich(r.results, (await useCatalog()).value)
   embedder.value = r.embedder || ""
-  // /TEACH
 }
 onMounted(() => { if (q.value) search() })
 </script>

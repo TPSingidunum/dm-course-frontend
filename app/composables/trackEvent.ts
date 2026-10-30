@@ -1,5 +1,5 @@
-// Day 1: trackEvent(payload) + pomagači za svih 8 tipova događaja.
-// Session ID i demo korisnik žive u localStorage (samo na klijentu).
+// Day 1: trackEvent(payload) + helpers for all 8 event types.
+// The session ID and the demo user live in localStorage (client only).
 
 export type EventType = "product_view" | "category_view" | "search" | "add_to_cart" | "remove_from_cart"
     | "purchase" | "recommendation_impression" | "recommendation_click"
@@ -15,7 +15,7 @@ export interface TrackPayload {
     recommendation_position?: number | null
 }
 
-export const DEMO_USER_ID = 395  // najaktivniji korisnik u seed-u (Day 8/12 demo)
+export const DEMO_USER_ID = 395  // the most active user in the seed (Day 8/12 demo)
 
 export function getOrGenerateSessionId() {
     if (import.meta.client) {
@@ -41,7 +41,6 @@ export function setDemoUserId(id: number) {
 }
 
 export async function trackEvent(payload: TrackPayload) {
-    // TEACH d01: trackEvent -> POST /api/event/track (nikad ne ruši stranicu)
     if (!import.meta.client) return null
     try {
         return await $fetch("/api/event/track", {
@@ -49,10 +48,9 @@ export async function trackEvent(payload: TrackPayload) {
             body: { ...payload, user_id: getDemoUserId(), user_session: getOrGenerateSessionId() },
         })
     } catch (e) {
-        console.warn("trackEvent failed", e)   // tracking nikad ne ruši stranicu
+        console.warn("trackEvent failed", e)   // tracking never breaks the page
         return null
     }
-    // /TEACH
 }
 
 type P = { product_id: number, price?: number | null, category_id?: number | null }

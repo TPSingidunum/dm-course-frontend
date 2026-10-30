@@ -1,5 +1,5 @@
-// defineDbHandler = defineEventHandler + "graceful degrade" kada lokalna MariaDB nije pokrenuta.
-// Umesto generičkog 500 vraća 503 "Database unavailable" sa uputstvom (vidi README → Baza podataka).
+// defineDbHandler = defineEventHandler + graceful degradation when the local MariaDB is not running.
+// Instead of a generic 500 it returns 503 "Database unavailable" with instructions (see README → Database).
 import type { EventHandler, EventHandlerRequest } from "h3"
 
 const DB_CODES = ["ECONNREFUSED", "ER_ACCESS_DENIED_ERROR", "ER_BAD_DB_ERROR", "ENOTFOUND", "ETIMEDOUT", "PROTOCOL_CONNECTION_LOST", "ER_NO_SUCH_TABLE"]
@@ -17,7 +17,7 @@ export function defineDbHandler<T extends EventHandlerRequest, D>(handler: Event
             if (code && DB_CODES.includes(code)) {
                 throw createError({
                     statusCode: 503, statusMessage: "Database unavailable",
-                    message: `Lokalna MariaDB nije dostupna (${code}). Pokreni je (README → Baza podataka) ili podesi DB_* u .env.`,
+                    message: `The local MariaDB is unavailable (${code}). Start it (README → Database) or set DB_* in .env.`,
                 })
             }
             throw e

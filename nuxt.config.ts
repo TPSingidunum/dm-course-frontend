@@ -12,8 +12,8 @@ export default defineNuxtConfig({
   },
   modules: ['@nuxt/eslint', '@nuxt/image', '@nuxt/ui'],
 
-  // Bazni URL dm-ml API-ja. Prepisuje se u runtime-u env promenljivom NUXT_ML_API_URL.
-  // Sav saobraćaj /ml/** ide kroz server/routes/ml/[...path].ts (proxy).
+  // Base URL of the dm-ml API. Overridden at runtime by the NUXT_ML_API_URL env variable.
+  // All /ml/** traffic goes through server/routes/ml/[...path].ts (proxy).
   runtimeConfig: {
     mlApiUrl: "http://127.0.0.1:3001",
   },

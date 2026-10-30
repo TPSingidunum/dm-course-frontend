@@ -1,4 +1,4 @@
-<!-- Day 1: provera tracking-a — poslednji događaji iz lokalne baze + broj po tipu. -->
+<!-- Day 1: tracking check — latest events from the local database + counts per type. -->
 <template>
   <div class="p-6">
     <h1 class="text-2xl font-bold mb-4">Events</h1>

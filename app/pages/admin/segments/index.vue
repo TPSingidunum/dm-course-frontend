@@ -1,17 +1,17 @@
-<!-- Day 2: segmentacija — trening, profili segmenata, manual RFM vs K-Means. -->
+<!-- Day 2: segmentation — training, segment profiles, manual RFM vs K-Means. -->
 <template>
   <div class="p-6">
     <div class="flex items-center gap-4 mb-4">
       <h1 class="text-2xl font-bold">Customer segments</h1>
       <UInput v-model.number="k" type="number" class="w-20" />
-      <UButton :loading="busy" @click="train" data-testid="train-segments">Treniraj (k={{ k }})</UButton>
+      <UButton :loading="busy" @click="train" data-testid="train-segments">Train (k={{ k }})</UButton>
     </div>
     <MlUnavailable v-if="down" />
-    <UAlert v-else-if="!meta" color="info" variant="subtle" title="Model nije treniran"
-      description="Kliknite „Treniraj“ (POST /ml/segments/train)." class="mb-4" data-testid="untrained" />
+    <UAlert v-else-if="!meta" color="info" variant="subtle" title="Model not trained"
+      description="Click “Train” (POST /ml/segments/train)." class="mb-4" data-testid="untrained" />
     <p v-if="err" class="text-error mb-2">{{ err }}</p>
     <template v-if="meta">
-      <p class="mb-2 text-sm">k={{ meta.k }} · silhouette={{ meta.silhouette }} · korisnika={{ meta.n_customers }} · referenca {{ meta.reference }}</p>
+      <p class="mb-2 text-sm">k={{ meta.k }} · silhouette={{ meta.silhouette }} · customers={{ meta.n_customers }} · reference {{ meta.reference }}</p>
       <UTable :data="meta.segments" :columns="segCols" class="mb-6" data-testid="segments-table" />
       <template v-if="meta.comparison">
         <h2 class="text-xl font-bold mb-2">Manual RFM vs K-Means (ARI = {{ meta.comparison.ari }})</h2>
@@ -28,18 +28,14 @@ const segCols = ['segment', 'count', 'share', 'recency_days', 'frequency', 'mone
 const domCols = ['bucket', 'cluster', 'share', 'count'].map(x => ({ accessorKey: x, header: x }))
 const dominant = computed(() => Object.entries(meta.value?.comparison?.dominant_cluster || {}).map(([b, v]: any) => ({ bucket: b, ...v })))
 async function load() {
-  // TEACH d02: učitaj segmente (503 = model nije treniran)
   try { meta.value = await $fetch('/ml/segments'); down.value = false }
   catch (e: any) { meta.value = null; down.value = !(e?.statusCode === 503 || e?.status === 503) }
-  // /TEACH
 }
 async function train() {
-  // TEACH d02: POST /segments/train
   busy.value = true
   const r = await mlPost('/segments/train', { k: k.value })
   busy.value = false; err.value = r.error || ""
   if (r.data) meta.value = r.data
-  // /TEACH
 }
 onMounted(load)
 </script>

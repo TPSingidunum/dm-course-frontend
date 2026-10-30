@@ -7,7 +7,7 @@
       <NuxtImg class="mx-auto w-1/2 border" :src="data.img_url" />
       <p class="pt-5">{{ data.description }}</p>
 
-      <!-- Day 12: Platform sekcija (AI opis sa fallback-om + module_class) -->
+      <!-- Day 12: Platform section (AI description with fallback + module_class) -->
       <UCard v-if="platform" class="mt-6" data-testid="platform-section">
         <p class="text-sm text-muted">Platform · {{ platform.ai_description?.source }}
           <span v-if="platform.ai_description?.fallback">(fallback: {{ platform.ai_description?.fallback_reason }})</span></p>
@@ -17,7 +17,7 @@
       <RecSection title="Recommended Products" source="content" :items="content" :fallback="contentFallback" />
       <RecSection title="Customers Also Viewed" source="collaborative" :items="collab" :fallback="collabFallback" />
       <RecSection title="Based on your session" source="session" :items="session" :fallback="sessionFallback"
-        :note="sessionFallback ? 'nema dovoljno signala u sesiji' : ''" />
+        :note="sessionFallback ? 'not enough signals in the session' : ''" />
       <RecSection title="Semantically similar" source="semantic" :items="semantic" />
     </div>
     <div class="relative">
@@ -59,38 +59,28 @@ onMounted(async () => {
             : (history.state?.back || "").startsWith("/search") ? "search_page" : "product_page"
   await trackProductView(P(), src)
   const cat = (await useCatalog()).value
-  // svaka sekcija je nezavisna: ako jedan modul padne, ostale se i dalje prikazuju
+  // each section is independent: if one module fails, the others are still shown
   await Promise.all([loadContent(cat), loadCollab(cat), loadSession(cat), loadSemantic(cat), loadPlatform()])
 })
 
 async function loadContent(cat: Record<number, Product>) {
-  // TEACH d05: content-based preporuke (TF-IDF)
   const c = await mlGet<any>(`/recommendations/content/${data.product_id}?limit=5`)
   if (c) { content.value = enrich(c.recommendations, cat); contentFallback.value = !!c.fallback }
-  // /TEACH
 }
 async function loadCollab(cat: Record<number, Product>) {
-  // TEACH d06: collaborative preporuke (item-item)
   const cf = await mlGet<any>(`/recommendations/collaborative/${data.product_id}?limit=5`)
   if (cf) { collab.value = enrich(cf.recommendations, cat); collabFallback.value = !!cf.fallback }
-  // /TEACH
 }
 async function loadSession(cat: Record<number, Product>) {
-  // TEACH d09: preporuke na osnovu tekuće sesije
   const se = await mlGet<any>(`/recommendations/session/${getOrGenerateSessionId()}?limit=5`)
   if (se) { session.value = enrich(se.recommendations, cat); sessionFallback.value = !!se.fallback }
-  // /TEACH
 }
 async function loadSemantic(cat: Record<number, Product>) {
-  // TEACH d10: semantički slični proizvodi (embeddings)
   const sm = await mlGet<any>(`/recommendations/semantic/${data.product_id}?limit=5`)
   if (sm) semantic.value = enrich(sm.recommendations, cat)
-  // /TEACH
 }
 async function loadPlatform() {
-  // TEACH d12: platform payload (AI opis + module_class)
   platform.value = await mlGet<any>(`/platform/product/${data.product_id}`)
-  // /TEACH
 }
 
 useSeoMeta({

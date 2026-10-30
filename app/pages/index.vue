@@ -1,4 +1,4 @@
-<!-- Day 12: personalizovana početna strana (GET /ml/platform/homepage) sa graceful fallback-om. -->
+<!-- Day 12: personalized homepage (GET /ml/platform/homepage) with a graceful fallback. -->
 <template>
   <div class="px-10 py-6">
     <h1 class="text-3xl font-bold mb-2">DM Shop</h1>
@@ -7,7 +7,7 @@
       <p class="text-xs text-muted mt-2">{{ home.hero.module_class }} · {{ home.hero.source }}
         <span v-if="home.hero.fallback">(fallback: {{ home.hero.fallback_reason }})</span></p>
     </UCard>
-    <p v-else-if="loaded" class="text-muted mb-6" data-testid="home-fallback">Personalizacija nedostupna — prikazujemo katalog.</p>
+    <p v-else-if="loaded" class="text-muted mb-6" data-testid="home-fallback">Personalization unavailable — showing the catalog.</p>
     <div v-if="home?.profile" class="flex gap-2 mb-4 text-sm">
       <UBadge variant="subtle">user {{ home.user_id }}</UBadge>
       <UBadge variant="subtle">segment: {{ home.profile.segment?.label }}</UBadge>
@@ -26,14 +26,12 @@
 import type { Rec } from '~/types/Product'
 const home = ref<any>(null); const recs = ref<Rec[]>([]); const recFallback = ref(false); const loaded = ref(false)
 onMounted(async () => {
-  // TEACH d12: personalizovana početna (GET /platform/homepage)
   const r = await mlGet<any>(`/platform/homepage?user_id=${getDemoUserId()}&session_id=${getOrGenerateSessionId()}&limit=5`)
   loaded.value = true
   if (!r) return
   home.value = r
   recs.value = enrich(r.recommendations?.recommendations, (await useCatalog()).value)
   recFallback.value = !!r.recommendations?.fallback
-  // /TEACH
   loaded.value = true
 })
 </script>

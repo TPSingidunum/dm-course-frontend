@@ -37,7 +37,7 @@ const data: CategoryData = await $fetch("/api/category/" + slug);
 onMounted(() => trackCategoryView(data.category.category_id))
 
 async function addToShoppingCart(p: Product) {
-  // korisnik je proizvod "video" na kategorijskoj strani -> product_view (source=category_page) + add_to_cart
+  // the user "saw" the product on the category page -> product_view (source=category_page) + add_to_cart
   const ev = { product_id: p.product_id, price: p.price, category_id: p.category_id }
   await trackProductView(ev, "category_page")
   if (await addToShoppingCartEvent(ev, 1, "category_page")) toast.add({ title: 'Added to shopping cart', description: p.name })

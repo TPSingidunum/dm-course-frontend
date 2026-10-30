@@ -1,10 +1,10 @@
-<!-- Day 12: marketing dashboard — moduli platforme (klasa, dostupnost, fallback) + profil demo korisnika. -->
+<!-- Day 12: marketing dashboard — platform modules (class, availability, fallback) + demo user profile. -->
 <template>
   <div class="p-6">
     <h1 class="text-2xl font-bold mb-4">Marketing platform</h1>
     <MlUnavailable v-if="!mods && loaded" />
     <template v-if="mods">
-      <p class="text-sm mb-2" data-testid="module-summary">modula {{ mods.modules.length }} · dostupno {{ mods.modules.filter((m: any) => m.available).length }}</p>
+      <p class="text-sm mb-2" data-testid="module-summary">modules {{ mods.modules.length }} · available {{ mods.modules.filter((m: any) => m.available).length }}</p>
       <UTable :data="mods.modules" :columns="cols" class="mb-6" data-testid="modules-table" />
     </template>
     <div class="flex gap-2 items-center mb-2">

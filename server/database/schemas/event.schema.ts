@@ -1,6 +1,6 @@
 import { datetime, decimal, int, mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
 
-// Day 1: proširena šema događaja (stara polja event_type / user_session / product_id ostaju).
+// Day 1: extended event schema (the old event_type / user_session / product_id fields remain).
 export const EVENT_TYPES = [
     "product_view", "category_view", "search", "add_to_cart", "remove_from_cart",
     "purchase", "recommendation_impression", "recommendation_click",

@@ -60,10 +60,6 @@ scripts/smoke.py          # end-to-end test (Playwright)
 docs/screenshots/         # images for this README
 ```
 
-Comments of the form `// TEACH dNN: … // /TEACH` in the code mark the parts that are written live in class
-on day *NN* (see `teaching/` in the monorepo). They have no effect on the app. Code comments and UI strings
-are in Serbian, the language the course is taught in.
-
 ## Running it
 
 Prerequisites: **Bun ≥ 1.2**, **Docker** (for the database), optionally Python 3.11+ for the dm-ml API.
@@ -104,7 +100,7 @@ Browser ──POST /api/event/track──▶ Nuxt ──▶ insert into MariaDB 
 
 * All ML pages call `/ml/...` (same origin, no CORS); the server forwards them to `NUXT_ML_API_URL`.
 * If dm-ml is down, the proxy returns **502**; `useMl()` returns `null` and pages show default content
-  or a "dm-ml nije dostupan" (dm-ml unavailable) notice — the store and tracking keep working.
+  or a "dm-ml is unavailable" notice — the store and tracking keep working.
 * Start dm-ml from the monorepo:
   ```bash
   git clone https://github.com/TeodorPetrovic/dm-course-monorepo && cd dm-course-monorepo

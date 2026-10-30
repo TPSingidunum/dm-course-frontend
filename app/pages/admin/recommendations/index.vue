@@ -1,4 +1,4 @@
-<!-- Day 7 (offline evaluacija) + Day 9 (CTR, popular vs personalized). -->
+<!-- Day 7 (offline evaluation) + Day 9 (CTR, popular vs personalized). -->
 <template>
   <div class="p-6">
     <div class="flex items-center gap-4 mb-4">
@@ -7,8 +7,8 @@
     </div>
     <MlUnavailable v-if="!report && loaded" />
     <template v-if="report">
-      <p class="text-sm mb-2" data-testid="eval-header">split {{ report.split_time }} · test slučajeva {{ report.n_test_cases }} ·
-        test sesija {{ report.n_test_sessions }} · train/test događaja {{ report.n_train_events }} / {{ report.n_test_events }}</p>
+      <p class="text-sm mb-2" data-testid="eval-header">split {{ report.split_time }} · test cases {{ report.n_test_cases }} ·
+        test sessions {{ report.n_test_sessions }} · train/test events {{ report.n_train_events }} / {{ report.n_test_events }}</p>
       <UTable :data="report.comparison" :columns="cols" class="mb-6" data-testid="eval-table" />
     </template>
     <div class="grid grid-cols-2 gap-6">
@@ -18,7 +18,7 @@
         <UTable :data="ctr.by_position.groups" :columns="ctrCols" />
       </UCard>
       <UCard v-if="cmp" data-testid="session-comparison">
-        <template #header>Popular vs personalized ({{ cmp.n_sessions }} sesija, simulacija)</template>
+        <template #header>Popular vs personalized ({{ cmp.n_sessions }} sessions, simulation)</template>
         <UTable :data="cmp.comparison" :columns="cmpCols" />
       </UCard>
     </div>
@@ -35,14 +35,10 @@ onMounted(async () => {
   loaded.value = true
 })
 async function loadEval() {
-  // TEACH d07: offline evaluacija (P@K, recall, NDCG, coverage)
   report.value = await mlGet('/analytics/recommendations')
-  // /TEACH
 }
 async function loadCtr() {
-  // TEACH d09: CTR dashboard + popular vs personalized
   ;[ctr.value, cmp.value] = await Promise.all([mlGet('/analytics/recommendations/ctr'),
     mlGet('/analytics/recommendations/session-comparison')])
-  // /TEACH
 }
 </script>

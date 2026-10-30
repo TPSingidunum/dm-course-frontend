@@ -3,8 +3,8 @@ import { db } from "~~/server/database/connection";
 import { DEFAULT_SOURCE, EVENT_TYPES, PRODUCT_EVENT_TYPES, event } from "~~/server/database/schemas/event.schema";
 import { eq } from "drizzle-orm";
 
-// Day 1: prihvata ceo event set, validira, čuva u lokalnu bazu i vraća sačuvan događaj.
-// Kopija ide i u dm-ml (POST /events) da bi session preporuke (Day 9) videle živu sesiju.
+// Day 1: accepts the full event set, validates it, stores it in the local database and returns the saved event.
+// A copy is also sent to dm-ml (POST /events) so session recommendations (Day 9) see the live session.
 const EventIn = z.object({
     event_type: z.enum(EVENT_TYPES),
     user_id: z.number().int().positive().nullish(),
@@ -17,15 +17,14 @@ const EventIn = z.object({
     recommendation_source: z.string().max(32).nullish(),
     recommendation_position: z.number().int().min(1).nullish(),
 }).refine(e => !(PRODUCT_EVENT_TYPES as readonly string[]).includes(e.event_type) || e.product_id != null,
-    { message: "product_id je obavezan za proizvodne događaje", path: ["product_id"] })
+    { message: "product_id is required for product events", path: ["product_id"] })
 
 function nowLocal(): string {
-    // normalizovan "YYYY-MM-DD HH:MM:SS" (bez zone, bez milisekundi) — isto kao Day 1 create_event
+    // normalized "YYYY-MM-DD HH:MM:SS" (no zone, no milliseconds) — same as Day 1 create_event
     return new Date().toISOString().slice(0, 19).replace("T", " ")
 }
 
 export default defineDbHandler(async (h) => {
-    // TEACH d01+: validacija + upis u bazu + prosleđivanje u dm-ml
     const parsed = EventIn.safeParse(await readBody(h))
     if (!parsed.success) {
         throw createError({ statusCode: 422, statusMessage: "invalid_event", data: parsed.error.issues })
@@ -50,5 +49,4 @@ export default defineDbHandler(async (h) => {
     const ml = await forwardToMl(path, Object.fromEntries(Object.entries(row).filter(([, v]) => v !== null)))
     setResponseStatus(h, 201)
     return { ...saved, forwarded_to_ml: ml.ok }
-    // /TEACH
 })
