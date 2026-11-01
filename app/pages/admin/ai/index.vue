@@ -31,6 +31,6 @@ async function generate() {
   const p = products.value.find(x => x.product_id === pid.value); if (!p) return
   busy.value = true
   const r = await mlPost<SeoResult>('/ai/seo', { product_name: p.name, description: p.description, category_name: catNames.value[p.category_id] || '' })
-  busy.value = false; err.value = r.error ? `dm-ml: ${r.error}` : ''; out.value = r.data
+  busy.value = false; err.value = r.error ? `ML API: ${r.error}` : ''; out.value = r.data
 }
 </script>

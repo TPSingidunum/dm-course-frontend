@@ -51,7 +51,7 @@ const recNote = ref("loading personalization…")
 async function loadRecs() {
   setDemoUserId(userId.value)
   const r = await mlGet<RecList>(`/recommendations/${userId.value}?limit=10`)
-  if (!r) { recIds.value = []; recNote.value = "dm-ml unavailable — default order"; mode.value = 'default'; return }
+  if (!r) { recIds.value = []; recNote.value = "ML API unavailable — default order"; mode.value = 'default'; return }
   recIds.value = (r.recommendations || []).map(x => x.product_id)
   if (r.fallback) recNote.value = `fallback: ${r.fallback_reason}`
   recIds.value.forEach((id, i) => trackRecommendationImpression(id, "hybrid", i + 1))

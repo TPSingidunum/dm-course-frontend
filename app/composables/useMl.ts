@@ -1,11 +1,11 @@
-// dm-ml calls through the Nitro proxy /ml/** -> :3001. Graceful fallback: error -> null (the page never crashes).
+// ML API calls through the Nitro proxy /ml/** -> :3001. Graceful fallback: error -> null (the page never crashes).
 import type { Product, Rec } from '~/types/Product'
 
 export async function mlGet<T = unknown>(path: string): Promise<T | null> {
     try {
         return await $fetch<T>("/ml" + path)
     } catch (e) {
-        console.warn("dm-ml unavailable:", path, e)
+        console.warn("ML API unavailable:", path, e)
         return null
     }
 }

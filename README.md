@@ -1,12 +1,11 @@
 # dm-course-frontend — Nuxt store for the "Digital Marketing & ML" course
 
 The frontend of the demo store from the **Digital Marketing and Machine Learning** course (12 days).
-This is *only* the Nuxt application — so students can see what the code looks like in practice:
-a catalog, a cart, event tracking and an admin panel that shows the results of the ML models
-(segmentation, conversion, campaigns, recommendations, AI content).
-
-> The backend (dm-ml FastAPI), lessons, notebooks and data live in the monorepo:
-> **https://github.com/TeodorPetrovic/dm-course-monorepo**
+It is a standalone Nuxt application: a catalog, a cart, event tracking and an admin panel for the
+ML features (segmentation, conversion, campaigns, recommendations, AI content).
+Everything it needs runs from this repository: a local MariaDB (docker compose) with demo data and
+product images. An external ML API is optional (`NUXT_ML_API_URL`); without it the store shows
+default content and clear "ML API is unavailable" notices, and tracking keeps working.
 
 ![Homepage](docs/screenshots/home.png)
 
@@ -19,7 +18,7 @@ a catalog, a cart, event tracking and an admin panel that shows the results of t
 | UI | [@nuxt/ui](https://ui.nuxt.com) 4, @nuxt/image, Tailwind (via Nuxt UI) |
 | Database | MariaDB / MySQL via [Drizzle ORM](https://orm.drizzle.team) + `mysql2` |
 | Validation | zod |
-| ML API | dm-ml (FastAPI, Python) — a separate service on `:3001`, proxied through `/ml/**` |
+| ML API | optional external ML API on `:3001`, proxied through `/ml/**` |
 
 ## Structure
 
@@ -52,7 +51,7 @@ server/                   # Nitro (runs on the server)
   database/
     connection.ts         # mysql2 pool + Drizzle (DB_* env)
     schemas/*.schema.ts   # Drizzle schemas: product, category, seo, event, user
-  routes/ml/[...path].ts  # proxy /ml/** → dm-ml API (NUXT_ML_API_URL)
+  routes/ml/[...path].ts  # proxy /ml/** → ML API (NUXT_ML_API_URL)
   utils/                  # dbHandler (503 when the DB is down), ml.ts (event forwarding), productWithSeo
 db/                       # schema.sql + seed.sql (synthetic data: 12 categories, 252 products, 500 events)
 docker-compose.yml        # local MariaDB on 127.0.0.1:3307
@@ -69,7 +68,7 @@ Prerequisites:
 | Bun | **≥ 1.3** (recommended **1.4.2**, pinned in `packageManager`) | Bun < 1.4 cannot read the `bun.lock` format and re-resolves; Bun < 1.3 fails |
 | Node.js | optional — not needed by the scripts | if you run `nuxt` directly with Node, use `^22.22.3`, `^24.15.0` or `>=26` |
 | Docker | any recent | for the local database |
-| Python | 3.11+ (optional) | for the dm-ml API |
+| Python | 3.11+ (optional) | for `scripts/smoke.py` (Playwright) |
 
 All scripts (`dev`, `build`, `postinstall`, …) run with `bun --bun`, so they use the Bun runtime instead of whatever Node is on your `PATH`.
 
@@ -111,7 +110,7 @@ The warning about blocked postinstalls for `@parcel/watcher` / `unrs-resolver` i
 
 | Variable | Default | Description |
 |---|---|---|
-| `NUXT_ML_API_URL` | `http://127.0.0.1:3001` | base URL of the dm-ml API (runtime, no rebuild needed) |
+| `NUXT_ML_API_URL` | `http://127.0.0.1:3001` | base URL of the ML API (runtime, no rebuild needed) |
 | `DB_HOST` / `DB_PORT` | `127.0.0.1` / `3307` | local MariaDB |
 | `DB_NAME` / `DB_USER` / `DB_PASSWORD` | `dm_local` | fake local demo credentials — never a real database |
 | `PORT` | `3000` | port of the production server |
@@ -125,28 +124,25 @@ Without Docker: create a `dm_local` database and user in any local MariaDB/MySQL
 
 If the database is not running, `/api/*` returns **503 "Database unavailable"** with instructions instead of crashing the server.
 
-## How the frontend talks to the dm-ml API
+## How the frontend talks to the ML API
 
 ```
-Browser ──/ml/segments──▶ Nuxt (server/routes/ml/[...path].ts) ──▶ dm-ml :3001/segments
-Browser ──POST /api/event/track──▶ Nuxt ──▶ insert into MariaDB (event) ──▶ forward to dm-ml /events (best-effort)
+Browser ──/ml/segments──▶ Nuxt (server/routes/ml/[...path].ts) ──▶ ML API :3001/segments
+Browser ──POST /api/event/track──▶ Nuxt ──▶ insert into MariaDB (event) ──▶ forward to ML API /events (best-effort)
 ```
 
 * All ML pages call `/ml/...` (same origin, no CORS); the server forwards them to `NUXT_ML_API_URL`.
-* If dm-ml is down, the proxy returns **502**; `useMl()` returns `null` and pages show default content
-  or a "dm-ml is unavailable" notice — the store and tracking keep working.
-* Start dm-ml from the monorepo:
-  ```bash
-  git clone https://github.com/TeodorPetrovic/dm-course-monorepo && cd dm-course-monorepo
-  scripts/setup.sh && cd apps/api && .venv/bin/uvicorn app.main:app --port 3001
-  ```
+* If ML API is down, the proxy returns **502**; `useMl()` returns `null` and pages show default content
+  or a "ML API is unavailable" notice — the store and tracking keep working.
+* The ML API is optional. Point `NUXT_ML_API_URL` at any compatible ML service (default
+  `http://127.0.0.1:3001`) to enable the ML pages; no rebuild is needed.
 * The demo user is `user_id = 395` (`DEMO_USER_ID` in `trackEvent.ts`); the session is stored in `localStorage`.
 
 ## Tests
 
 ```bash
 bun run build
-DM_ML_DIR=../dm-course-monorepo/apps/api $DM_ML_DIR/.venv/bin/python scripts/smoke.py   # 42 checks
+python3 scripts/smoke.py   # needs Playwright; ML checks run only if an ML API answers on :3001 (42 checks with it)
 ```
 
 ## Screenshots

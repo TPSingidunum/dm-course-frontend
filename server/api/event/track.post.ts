@@ -4,7 +4,7 @@ import { DEFAULT_SOURCE, EVENT_TYPES, PRODUCT_EVENT_TYPES, event } from "~~/serv
 import { eq } from "drizzle-orm";
 
 // Day 1: accepts the full event set, validates it, stores it in the local database and returns the saved event.
-// A copy is also sent to dm-ml (POST /events) so session recommendations (Day 9) see the live session.
+// A copy is also sent to ML API (POST /events) so session recommendations (Day 9) see the live session.
 const EventIn = z.object({
     event_type: z.enum(EVENT_TYPES),
     user_id: z.number().int().positive().nullish(),

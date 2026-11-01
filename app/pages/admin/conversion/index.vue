@@ -55,7 +55,7 @@ async function train() {
 async function predict() {
   pred.value = null; predErr.value = ""
   try { pred.value = await $fetch<ConversionPrediction>(`/ml/customers/${uid.value}/conversion-probability`) }
-  catch (e: unknown) { predErr.value = httpStatus(e) === 503 ? 'model not trained' : 'dm-ml unavailable' }
+  catch (e: unknown) { predErr.value = httpStatus(e) === 503 ? 'model not trained' : 'ML API unavailable' }
 }
 onMounted(load)
 </script>

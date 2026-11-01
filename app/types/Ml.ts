@@ -1,4 +1,4 @@
-// Response shapes of the dm-ml API endpoints used by the pages.
+// Response shapes of the ML API endpoints used by the pages.
 // Only the fields the UI reads are typed; table rows are generic records.
 import type { Rec } from './Product'
 

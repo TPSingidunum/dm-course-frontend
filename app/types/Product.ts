@@ -16,7 +16,7 @@ export interface Seo {
   key_words: string[]
 }
 
-// dm-ml recommendation (some endpoints only return product_id/name/score -> enrich from the catalog)
+// ML API recommendation (some endpoints only return product_id/name/score -> enrich from the catalog)
 export interface Rec {
   product_id: number
   name: string

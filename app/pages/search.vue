@@ -35,7 +35,7 @@ async function search() {
   if (!q.value.trim()) return
   await trackSearchEvent()
   const r = await mlGet<SemanticSearch>(`/search/semantic?q=${encodeURIComponent(q.value)}&limit=10`)
-  if (!r) { error.value = "dm-ml unavailable — search is currently not working"; results.value = []; return }
+  if (!r) { error.value = "ML API unavailable — search is currently not working"; results.value = []; return }
   error.value = ""; res.value = r; results.value = enrich(r.results, (await useCatalog()).value)
   embedder.value = r.embedder || ""
 }

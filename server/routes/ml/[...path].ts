@@ -1,11 +1,11 @@
-// Proxy /ml/** -> dm-ml API (NUXT_ML_API_URL, default http://127.0.0.1:3001).
-// If the API is unreachable it returns 502 (503 is reserved for dm-ml "model not trained"); the useMl() composable treats it as "ML unavailable".
+// Proxy /ml/** -> ML API (NUXT_ML_API_URL, default http://127.0.0.1:3001).
+// If the API is unreachable it returns 502 (503 is reserved for ML API "model not trained"); the useMl() composable treats it as "ML unavailable".
 export default defineEventHandler(async (event) => {
   const base = String(useRuntimeConfig(event).mlApiUrl || "http://127.0.0.1:3001").replace(/\/$/, "")
   const path = event.path.replace(/^\/ml/, "") || "/"
   try {
     return await proxyRequest(event, base + path)
   } catch {
-    throw createError({ statusCode: 502, statusMessage: "dm-ml API unavailable" })
+    throw createError({ statusCode: 502, statusMessage: "ML API unavailable" })
   }
 })
