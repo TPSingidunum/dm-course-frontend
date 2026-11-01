@@ -27,13 +27,14 @@
 
 <script lang="ts" setup>
 import type { Rec } from '~/types/Product'
+import type { SemanticSearch } from '~/types/Ml'
 const route = useRoute()
 const q = ref(String(route.query.q || ""))
-const res = ref<any>(null); const error = ref(""); const results = ref<Rec[]>([]); const embedder = ref("")
+const res = ref<SemanticSearch | null>(null); const error = ref(""); const results = ref<Rec[]>([]); const embedder = ref("")
 async function search() {
   if (!q.value.trim()) return
   await trackSearchEvent()
-  const r = await mlGet<any>(`/search/semantic?q=${encodeURIComponent(q.value)}&limit=10`)
+  const r = await mlGet<SemanticSearch>(`/search/semantic?q=${encodeURIComponent(q.value)}&limit=10`)
   if (!r) { error.value = "dm-ml unavailable — search is currently not working"; results.value = []; return }
   error.value = ""; res.value = r; results.value = enrich(r.results, (await useCatalog()).value)
   embedder.value = r.embedder || ""

@@ -1,9 +1,10 @@
 <template>
-  <UModal :open="open" :title="`Deleting product ${props.productId}`" :close="{ onClick: () => emit('close', false) }"
+  <UModal
+:open="open" :title="`Deleting product ${props.productId}`" :close="{ onClick: () => emit('close', false) }"
     description="You are deleting the product">
 
     <template #footer>
-      <p v-bind="error" class="text-red-600"></p>
+      <p v-bind="error" class="text-red-600"/>
       <UButton @click="onSubmit">Delete</UButton>
     </template>
   </UModal>

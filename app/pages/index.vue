@@ -24,9 +24,10 @@
 
 <script lang="ts" setup>
 import type { Rec } from '~/types/Product'
-const home = ref<any>(null); const recs = ref<Rec[]>([]); const recFallback = ref(false); const loaded = ref(false)
+import type { Homepage } from '~/types/Ml'
+const home = ref<Homepage | null>(null); const recs = ref<Rec[]>([]); const recFallback = ref(false); const loaded = ref(false)
 onMounted(async () => {
-  const r = await mlGet<any>(`/platform/homepage?user_id=${getDemoUserId()}&session_id=${getOrGenerateSessionId()}&limit=5`)
+  const r = await mlGet<Homepage>(`/platform/homepage?user_id=${getDemoUserId()}&session_id=${getOrGenerateSessionId()}&limit=5`)
   loaded.value = true
   if (!r) return
   home.value = r

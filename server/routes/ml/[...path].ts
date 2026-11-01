@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
   const path = event.path.replace(/^\/ml/, "") || "/"
   try {
     return await proxyRequest(event, base + path)
-  } catch (e: any) {
+  } catch {
     throw createError({ statusCode: 502, statusMessage: "dm-ml API unavailable" })
   }
 })

@@ -10,8 +10,10 @@
   </div>
 </template>
 <script lang="ts" setup>
+import type { EventList } from '~/types/Ml'
+
 definePageMeta({ layout: 'admin' })
 const cols = ['event_id', 'event_type', 'user_id', 'user_session', 'product_id', 'category_id', 'price', 'quantity',
   'source', 'timestamp', 'recommendation_source', 'recommendation_position'].map(k => ({ accessorKey: k, header: k }))
-const { data, error } = await useFetch<any>('/api/event?limit=50')
+const { data, error } = await useFetch<EventList>('/api/event?limit=50')
 </script>

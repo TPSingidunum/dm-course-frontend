@@ -11,11 +11,13 @@
   </div>
 </template>
 <script lang="ts" setup>
+import type { EvalReport } from '~/types/Ml'
+
 definePageMeta({ layout: 'admin' })
-const rep = ref<any>(null); const loaded = ref(false)
+const rep = ref<EvalReport | null>(null); const loaded = ref(false)
 const cols = ['method', 'precision_at_k', 'recall_at_k', 'hit_rate_at_k', 'ndcg_at_k', 'catalog_coverage'].map(x => ({ accessorKey: x, header: x }))
 onMounted(async () => {
-  rep.value = await mlGet('/analytics/recommendations/hybrid')
+  rep.value = await mlGet<EvalReport>('/analytics/recommendations/hybrid')
   loaded.value = true
 })
 </script>

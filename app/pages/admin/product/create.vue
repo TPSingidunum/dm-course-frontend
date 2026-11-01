@@ -23,7 +23,7 @@
           </UFormField>
 
           <UFormField>
-            <USelect placeholder="Select a category" v-model="state.category_id" :items="categories" class="w-1/2"/>
+            <USelect v-model="state.category_id" placeholder="Select a category" :items="categories" class="w-1/2"/>
           </UFormField>
           
           <UFormField label="Description" name="description">
@@ -50,7 +50,7 @@
           </UFormField>
 
           <div class="flex justify-end gap-5">
-            <UButton @click="generateSeo" class="cursor-pointer">Generate</UButton>
+            <UButton class="cursor-pointer" @click="generateSeo">Generate</UButton>
             <UButton type="submit" class="cursor-pointer">Create</UButton>
           </div>
         </UForm>
@@ -60,6 +60,7 @@
 </template>
 
 <script lang="ts" setup>
+import type { SeoResponse } from '~/types/Ml'
 import type { FormSubmitEvent, SelectItem } from '@nuxt/ui'
 import z from 'zod'
 
@@ -83,7 +84,7 @@ const categories = ref<SelectItem[]>(
 
 const schema = z.object({
   name: z.string('Name is required').min(3, 'Must be at least 3 characters').max(64, 'Must be at most 64 characters'),
-  slug: z.string('Slug is required').regex(/^[a-z0-9\-]{3,128}$/, "You slug has to contain only lowercase letters, numbers and a - symbol"),
+  slug: z.string('Slug is required').regex(/^[a-z0-9-]{3,128}$/, "Your slug has to contain only lowercase letters, numbers and a - symbol"),
   category_id: z.int('Categori required'),
   description: z.string('Description is required'),
   img_url: z.httpUrl('Image Link is required'),
@@ -122,11 +123,6 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   })
 }
 
-export interface SeoResponse {
-  title: string
-  description: string
-  keywords: string[]
-}
 
 async function generateSeo() {
 
@@ -135,11 +131,10 @@ async function generateSeo() {
     description: state.description,
   }
 
-  await $fetch("/ml/seo/generate/product", {
+  await $fetch<SeoResponse>("/ml/seo/generate/product", {
     method: "POST",
     body: data
-  }).then((res: any) => {
-    const result: SeoResponse = res
+  }).then((result) => {
     state.seo_title = result.title
     state.seo_description = result.description
     state.seo_keywords = result.keywords

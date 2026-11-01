@@ -1,6 +1,6 @@
 import { and, eq, ne } from "drizzle-orm";
 import { db } from "~~/server/database/connection";
-import { NewProduct, product } from "~~/server/database/schemas/product.schema";
+import { product } from "~~/server/database/schemas/product.schema";
 import { seo } from "~~/server/database/schemas/seo.schema";
 
 export interface UpdateProduct {

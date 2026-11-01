@@ -32,7 +32,7 @@ const toast = useToast()
 const slug = route.params.slug;
 
 interface CategoryData { category: Category, products: Product[] }
-const data: CategoryData = await $fetch("/api/category/" + slug);
+const data = await $fetch<CategoryData>("/api/category/" + slug);
 
 onMounted(() => trackCategoryView(data.category.category_id))
 

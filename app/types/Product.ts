@@ -6,7 +6,8 @@ export interface Product {
   description: string
   category_id: number
   price: number | null
-  seo?: Seo
+  seo_id?: number
+  seo?: Seo | null
 }
 
 export interface Seo {

@@ -11,7 +11,7 @@
       </div>
       <UCard class="w-full md:w-1/2 mt-60 self-center mx-auto">
         <template #header>
-          <h1> Updating product {{ data.product_id }}</h1>
+          <h1> Updating product {{ data?.product_id }}</h1>
         </template>
         <UForm ref="form" :schema="schema" :state="state" class="space-y-4 w-full" @submit="onSubmit">
           <UFormField label="Name" name="name">
@@ -23,7 +23,7 @@
           </UFormField>
 
           <UFormField>
-            <USelect placeholder="Select a category" v-model="state.category_id" :items="categories" class="w-1/2"/>
+            <USelect v-model="state.category_id" placeholder="Select a category" :items="categories" class="w-1/2"/>
           </UFormField>
           
           <UFormField label="Description" name="description">
@@ -50,7 +50,7 @@
           </UFormField>
 
           <div class="flex justify-end gap-5">
-            <UButton @click="generateSeo" class="cursor-pointer">Generate</UButton>
+            <UButton class="cursor-pointer" @click="generateSeo">Generate</UButton>
             <UButton type="submit" class="cursor-pointer">Update</UButton>
           </div>
         </UForm>
@@ -60,6 +60,8 @@
 </template>
 
 <script lang="ts" setup>
+import type { Product } from '~/types/Product'
+import type { SeoResponse } from '~/types/Ml'
 import type { FormSubmitEvent, SelectItem } from '@nuxt/ui'
 import z from 'zod'
 
@@ -72,7 +74,7 @@ const route = useRoute();
 const id = route.params.id;
 const form = useTemplateRef('form')
 
-const { data } = await useFetch('/api/product/id/' + id)
+const { data } = await useFetch<Product>('/api/product/id/' + id)
 const categoriesData = await $fetch("/api/category");
 console.log(data)
 console.log(categoriesData)
@@ -88,7 +90,7 @@ const categories = ref<SelectItem[]>(
 
 const schema = z.object({
   name: z.string('Name is required').min(3, 'Must be at least 3 characters').max(64, 'Must be at most 64 characters'),
-  slug: z.string('Slug is required').regex(/^[a-z0-9\-]{3,128}$/, "You slug has to contain only lowercase letters, numbers and a - symbol"),
+  slug: z.string('Slug is required').regex(/^[a-z0-9-]{3,128}$/, "Your slug has to contain only lowercase letters, numbers and a - symbol"),
   category_id: z.int('Categori required'),
   description: z.string('Description is required'),
   seo_id: z.int(),
@@ -99,15 +101,15 @@ const schema = z.object({
 })
 type Schema = z.output<typeof schema>
 const state = reactive<Partial<Schema>>({
-  name: data.value.name,
-  slug: data.value.slug,
-  seo_id: data.value.seo_id,
-  category_id: data.value.category_id,
-  description: data.value.description,
-  img_url: data.value.img_url,
-  seo_title: data.value.seo.title,
-  seo_description: data.value.seo.description,
-  seo_keywords: data.value.seo.key_words
+  name: data.value?.name,
+  slug: data.value?.slug,
+  seo_id: data.value?.seo_id,
+  category_id: data.value?.category_id,
+  description: data.value?.description,
+  img_url: data.value?.img_url,
+  seo_title: data.value?.seo?.title,
+  seo_description: data.value?.seo?.description,
+  seo_keywords: data.value?.seo?.key_words
 })
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
@@ -129,11 +131,6 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   })
 }
 
-export interface SeoResponse {
-  title: string
-  description: string
-  keywords: string[]
-}
 
 async function generateSeo() {
 
@@ -142,11 +139,10 @@ async function generateSeo() {
     description: state.description,
   }
 
-  await $fetch("/ml/seo/generate/product", {
+  await $fetch<SeoResponse>("/ml/seo/generate/product", {
     method: "POST",
     body: data
-  }).then((res: any) => {
-    const result: SeoResponse = res
+  }).then((result) => {
     state.seo_title = result.title
     state.seo_description = result.description
     state.seo_keywords = result.keywords

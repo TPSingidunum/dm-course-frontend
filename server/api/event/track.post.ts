@@ -39,10 +39,10 @@ export default defineDbHandler(async (h) => {
     }
     let insertId: number
     try {
-        const res: any = await db.insert(event).values(row)
-        insertId = res[0].insertId
-    } catch (err: any) {
-        throw createError({ statusCode: 503, statusMessage: "db_unavailable", data: String(err?.message || err) })
+        const [res] = await db.insert(event).values(row)
+        insertId = res.insertId
+    } catch (err: unknown) {
+        throw createError({ statusCode: 503, statusMessage: "db_unavailable", data: err instanceof Error ? (err.message || String(err)) : String(err) })
     }
     const saved = (await db.select().from(event).where(eq(event.event_id, insertId)))[0]
     const path = e.event_type.startsWith("recommendation_") ? "/recommendations/events" : "/events"

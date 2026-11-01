@@ -10,7 +10,7 @@ export async function forwardToMl(path: string, body: unknown): Promise<{ ok: bo
             signal: AbortSignal.timeout(3000),
         })
         return { ok: r.ok, status: r.status }
-    } catch (e: any) {
-        return { ok: false, error: String(e?.message || e) }
+    } catch (e: unknown) {
+        return { ok: false, error: e instanceof Error ? (e.message || String(e)) : String(e) }
     }
 }

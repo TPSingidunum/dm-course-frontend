@@ -44,12 +44,11 @@ definePageMeta({
 })
 
 const router = useRouter()
-const toast = useToast()
 const form = useTemplateRef('form')
 
 const schema = z.object({
   name: z.string('Name is required').min(3, 'Must be at least 3 characters').max(64, 'Must be at most 64 characters'),
-  slug: z.string('Slug is required').regex(/^[a-z0-9\-]{3,128}$/, "You slug has to contain only lowercase letters, numbers and a - symbol"),
+  slug: z.string('Slug is required').regex(/^[a-z0-9-]{3,128}$/, "Your slug has to contain only lowercase letters, numbers and a - symbol"),
   img_url: z.httpUrl('Image Link is required'),
 })
 type Schema = z.output<typeof schema>

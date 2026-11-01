@@ -1,7 +1,9 @@
 import { eq } from "drizzle-orm";
 import { db } from "~~/server/database/connection";
-import { NewProduct, product } from "~~/server/database/schemas/product.schema";
-import { NewSeo, seo } from "~~/server/database/schemas/seo.schema";
+import type { NewProduct} from "~~/server/database/schemas/product.schema";
+import { product } from "~~/server/database/schemas/product.schema";
+import type { NewSeo} from "~~/server/database/schemas/seo.schema";
+import { seo } from "~~/server/database/schemas/seo.schema";
 
 export interface CreateProduct {
   name: string;

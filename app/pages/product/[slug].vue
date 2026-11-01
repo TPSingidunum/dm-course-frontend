@@ -16,7 +16,8 @@
 
       <RecSection title="Recommended Products" source="content" :items="content" :fallback="contentFallback" />
       <RecSection title="Customers Also Viewed" source="collaborative" :items="collab" :fallback="collabFallback" />
-      <RecSection title="Based on your session" source="session" :items="session" :fallback="sessionFallback"
+      <RecSection
+title="Based on your session" source="session" :items="session" :fallback="sessionFallback"
         :note="sessionFallback ? 'not enough signals in the session' : ''" />
       <RecSection title="Semantically similar" source="semantic" :items="semantic" />
     </div>
@@ -26,9 +27,9 @@
         <p class="text-2xl font-bold pt-4" data-testid="product-name">{{ data.name }}</p>
         <p class="text-gray-600">{{ data.description }}</p>
         <p class="text-2xl pb-2 font-bold" data-testid="product-price">{{ formatPrice(data.price) }}</p>
-        <UButton @click="addToCart" class="w-full mb-2 cursor-pointer">Add to cart</UButton>
-        <UButton v-if="inCart" @click="removeFromCart" variant="ghost" class="w-full mb-2 cursor-pointer">Remove from cart</UButton>
-        <UButton @click="buy" variant="outline" class="w-full cursor-pointer">Buy</UButton>
+        <UButton class="w-full mb-2 cursor-pointer" @click="addToCart">Add to cart</UButton>
+        <UButton v-if="inCart" variant="ghost" class="w-full mb-2 cursor-pointer" @click="removeFromCart">Remove from cart</UButton>
+        <UButton variant="outline" class="w-full cursor-pointer" @click="buy">Buy</UButton>
       </div>
     </div>
   </div>
@@ -36,20 +37,21 @@
 
 <script lang="ts" setup>
 import type { Product, Rec } from '~/types/Product';
+import type { ProductPlatform, RecList } from '~/types/Ml';
 
 const router = useRouter()
 const route = useRoute()
 const toast = useToast()
 const slug = route.params.slug;
 
-const data: Product = await $fetch("/api/product/" + slug)
+const data = await $fetch<Product>("/api/product/" + slug)
 if (!data) throw createError({ statusCode: 404, statusMessage: "Product not found" })
 
 const content = ref<Rec[]>([]); const contentFallback = ref(false)
 const collab = ref<Rec[]>([]); const collabFallback = ref(false)
 const session = ref<Rec[]>([]); const sessionFallback = ref(false)
 const semantic = ref<Rec[]>([])
-const platform = ref<any>(null)
+const platform = ref<ProductPlatform | null>(null)
 const inCart = ref(false)
 const P = () => ({ product_id: data.product_id, price: data.price, category_id: data.category_id })
 
@@ -64,23 +66,23 @@ onMounted(async () => {
 })
 
 async function loadContent(cat: Record<number, Product>) {
-  const c = await mlGet<any>(`/recommendations/content/${data.product_id}?limit=5`)
+  const c = await mlGet<RecList>(`/recommendations/content/${data.product_id}?limit=5`)
   if (c) { content.value = enrich(c.recommendations, cat); contentFallback.value = !!c.fallback }
 }
 async function loadCollab(cat: Record<number, Product>) {
-  const cf = await mlGet<any>(`/recommendations/collaborative/${data.product_id}?limit=5`)
+  const cf = await mlGet<RecList>(`/recommendations/collaborative/${data.product_id}?limit=5`)
   if (cf) { collab.value = enrich(cf.recommendations, cat); collabFallback.value = !!cf.fallback }
 }
 async function loadSession(cat: Record<number, Product>) {
-  const se = await mlGet<any>(`/recommendations/session/${getOrGenerateSessionId()}?limit=5`)
+  const se = await mlGet<RecList>(`/recommendations/session/${getOrGenerateSessionId()}?limit=5`)
   if (se) { session.value = enrich(se.recommendations, cat); sessionFallback.value = !!se.fallback }
 }
 async function loadSemantic(cat: Record<number, Product>) {
-  const sm = await mlGet<any>(`/recommendations/semantic/${data.product_id}?limit=5`)
+  const sm = await mlGet<RecList>(`/recommendations/semantic/${data.product_id}?limit=5`)
   if (sm) semantic.value = enrich(sm.recommendations, cat)
 }
 async function loadPlatform() {
-  platform.value = await mlGet<any>(`/platform/product/${data.product_id}`)
+  platform.value = await mlGet<ProductPlatform>(`/platform/product/${data.product_id}`)
 }
 
 useSeoMeta({

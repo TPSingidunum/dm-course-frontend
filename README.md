@@ -82,7 +82,7 @@ bun run dev                   # http://localhost:3000
 
 Production build: `bun run build && bun .output/server/index.mjs`.
 
-Lint: `bun run lint` (ESLint 10 via `@nuxt/eslint`).
+Lint and type check: `bun run lint` (ESLint 10 via `@nuxt/eslint`) and `bun run typecheck` (vue-tsc on the app and server code). Both pass with zero problems; the code has no `any` types.
 
 ### Troubleshooting `bun install`
 

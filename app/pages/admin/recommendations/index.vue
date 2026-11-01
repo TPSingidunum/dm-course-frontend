@@ -25,8 +25,10 @@
   </div>
 </template>
 <script lang="ts" setup>
+import type { CtrReport, EvalReport, SessionComparison } from '~/types/Ml'
+
 definePageMeta({ layout: 'admin' })
-const report = ref<any>(null); const ctr = ref<any>(null); const cmp = ref<any>(null); const loaded = ref(false)
+const report = ref<EvalReport | null>(null); const ctr = ref<CtrReport | null>(null); const cmp = ref<SessionComparison | null>(null); const loaded = ref(false)
 const cols = ['method', 'precision_at_k', 'recall_at_k', 'hit_rate_at_k', 'ndcg_at_k', 'catalog_coverage'].map(x => ({ accessorKey: x, header: x }))
 const ctrCols = ['group', 'impressions', 'clicks', 'ctr'].map(x => ({ accessorKey: x, header: x }))
 const cmpCols = ['algorithm', 'impressions', 'clicks', 'ctr'].map(x => ({ accessorKey: x, header: x }))
@@ -35,10 +37,10 @@ onMounted(async () => {
   loaded.value = true
 })
 async function loadEval() {
-  report.value = await mlGet('/analytics/recommendations')
+  report.value = await mlGet<EvalReport>('/analytics/recommendations')
 }
 async function loadCtr() {
-  ;[ctr.value, cmp.value] = await Promise.all([mlGet('/analytics/recommendations/ctr'),
-    mlGet('/analytics/recommendations/session-comparison')])
+  ;[ctr.value, cmp.value] = await Promise.all([mlGet<CtrReport>('/analytics/recommendations/ctr'),
+    mlGet<SessionComparison>('/analytics/recommendations/session-comparison')])
 }
 </script>

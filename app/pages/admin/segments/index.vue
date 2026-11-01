@@ -4,10 +4,11 @@
     <div class="flex items-center gap-4 mb-4">
       <h1 class="text-2xl font-bold">Customer segments</h1>
       <UInput v-model.number="k" type="number" class="w-20" />
-      <UButton :loading="busy" @click="train" data-testid="train-segments">Train (k={{ k }})</UButton>
+      <UButton :loading="busy" data-testid="train-segments" @click="train">Train (k={{ k }})</UButton>
     </div>
     <MlUnavailable v-if="down" />
-    <UAlert v-else-if="!meta" color="info" variant="subtle" title="Model not trained"
+    <UAlert
+v-else-if="!meta" color="info" variant="subtle" title="Model not trained"
       description="Click “Train” (POST /ml/segments/train)." class="mb-4" data-testid="untrained" />
     <p v-if="err" class="text-error mb-2">{{ err }}</p>
     <template v-if="meta">
@@ -21,19 +22,22 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { httpStatus } from '~/types/Ml'
+import type { SegmentsMeta } from '~/types/Ml'
+
 definePageMeta({ layout: 'admin' })
-const k = ref(4); const meta = ref<any>(null); const busy = ref(false); const err = ref(""); const down = ref(false)
+const k = ref(4); const meta = ref<SegmentsMeta | null>(null); const busy = ref(false); const err = ref(""); const down = ref(false)
 const segCols = ['segment', 'count', 'share', 'recency_days', 'frequency', 'monetary', 'aov', 'conversion', 'profile']
   .map(x => ({ accessorKey: x, header: x }))
 const domCols = ['bucket', 'cluster', 'share', 'count'].map(x => ({ accessorKey: x, header: x }))
-const dominant = computed(() => Object.entries(meta.value?.comparison?.dominant_cluster || {}).map(([b, v]: any) => ({ bucket: b, ...v })))
+const dominant = computed(() => Object.entries(meta.value?.comparison?.dominant_cluster || {}).map(([b, v]) => ({ bucket: b, ...v })))
 async function load() {
-  try { meta.value = await $fetch('/ml/segments'); down.value = false }
-  catch (e: any) { meta.value = null; down.value = !(e?.statusCode === 503 || e?.status === 503) }
+  try { meta.value = await $fetch<SegmentsMeta>('/ml/segments'); down.value = false }
+  catch (e: unknown) { meta.value = null; down.value = httpStatus(e) !== 503 }
 }
 async function train() {
   busy.value = true
-  const r = await mlPost('/segments/train', { k: k.value })
+  const r = await mlPost<SegmentsMeta>('/segments/train', { k: k.value })
   busy.value = false; err.value = r.error || ""
   if (r.data) meta.value = r.data
 }

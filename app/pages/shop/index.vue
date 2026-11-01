@@ -5,8 +5,9 @@
       <h1 class="text-2xl font-bold">Shop</h1>
       <UButtonGroup>
         <UButton :variant="mode === 'default' ? 'solid' : 'outline'" @click="mode = 'default'">Default</UButton>
-        <UButton :variant="mode === 'personalized' ? 'solid' : 'outline'" :disabled="!recIds.length"
-          @click="mode = 'personalized'" data-testid="personalized-toggle">Personalized</UButton>
+        <UButton
+:variant="mode === 'personalized' ? 'solid' : 'outline'" :disabled="!recIds.length"
+          data-testid="personalized-toggle" @click="mode = 'personalized'">Personalized</UButton>
       </UButtonGroup>
       <UInput v-model.number="userId" type="number" class="w-28" @change="loadRecs" />
       <span class="text-sm text-muted" data-testid="shop-status">
@@ -38,9 +39,10 @@
 
 <script lang="ts" setup>
 import type { Product } from '~/types/Product';
+import type { RecList } from '~/types/Ml';
 
 const toast = useToast()
-const products: Product[] = await $fetch("/api/shop");
+const products = await $fetch<Product[]>("/api/shop");
 const mode = ref<'default' | 'personalized'>('default')
 const userId = ref(DEMO_USER_ID)
 const recIds = ref<number[]>([])
@@ -48,9 +50,9 @@ const recNote = ref("loading personalization…")
 
 async function loadRecs() {
   setDemoUserId(userId.value)
-  const r = await mlGet<any>(`/recommendations/${userId.value}?limit=10`)
+  const r = await mlGet<RecList>(`/recommendations/${userId.value}?limit=10`)
   if (!r) { recIds.value = []; recNote.value = "dm-ml unavailable — default order"; mode.value = 'default'; return }
-  recIds.value = (r.recommendations || []).map((x: any) => x.product_id)
+  recIds.value = (r.recommendations || []).map(x => x.product_id)
   if (r.fallback) recNote.value = `fallback: ${r.fallback_reason}`
   recIds.value.forEach((id, i) => trackRecommendationImpression(id, "hybrid", i + 1))
 }
@@ -61,7 +63,6 @@ const ordered = computed(() => {
   const pos = new Map(recIds.value.map((id, i) => [id, i]))
   const rec = products.filter(p => pos.has(p.product_id)).sort((a, b) => pos.get(a.product_id)! - pos.get(b.product_id)!)
   return [...rec, ...products.filter(p => !pos.has(p.product_id))]
-  return products
 })
 const moved = computed(() => ordered.value.filter((p, i) => products[i]?.product_id !== p.product_id).length)
 

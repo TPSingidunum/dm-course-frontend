@@ -4,6 +4,7 @@
     <div class="p-10 grid grid-cols-3 gap-2">
       <UBlogPost
         v-for="category in categories"
+        :key="category.category_id"
         :image="category.img_url"
         class="w-full text-center"
         :title="category.name"
