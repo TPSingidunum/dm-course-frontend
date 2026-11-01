@@ -62,16 +62,50 @@ docs/screenshots/         # images for this README
 
 ## Running it
 
-Prerequisites: **Bun ≥ 1.2**, **Docker** (for the database), optionally Python 3.11+ for the dm-ml API.
+Prerequisites:
+
+| Tool | Version | Notes |
+|---|---|---|
+| Bun | **≥ 1.3** (recommended **1.4.2**, pinned in `packageManager`) | Bun < 1.4 cannot read the `bun.lock` format and re-resolves; Bun < 1.3 fails |
+| Node.js | optional — not needed by the scripts | if you run `nuxt` directly with Node, use `^22.22.3`, `^24.15.0` or `>=26` |
+| Docker | any recent | for the local database |
+| Python | 3.11+ (optional) | for the dm-ml API |
+
+All scripts (`dev`, `build`, `postinstall`, …) run with `bun --bun`, so they use the Bun runtime instead of whatever Node is on your `PATH`.
 
 ```bash
 cp .env.example .env          # optional; the defaults work without a .env
 docker compose up -d          # MariaDB with schema and seed data (127.0.0.1:3307)
-bun install
+bun install --frozen-lockfile   # or plain `bun install`
 bun run dev                   # http://localhost:3000
 ```
 
 Production build: `bun run build && bun .output/server/index.mjs`.
+
+Lint: `bun run lint` (ESLint 10 via `@nuxt/eslint`).
+
+### Troubleshooting `bun install`
+
+**Symptom:** `bun install` fails at the end with
+`SyntaxError: The requested module 'node:util' does not provide an export named 'styleText'`
+(or `parseEnv`) followed by `error: postinstall script from "dm-frontend" exited with 1`.
+
+**Cause:** the `postinstall` script (`nuxt prepare`) used to run through the `nuxt` binary's
+`#!/usr/bin/env node` shebang, i.e. with your **system Node.js**. Current Nuxt 4 releases require
+Node 22.22+/24.15+, so an older Node (18/20) crashes. It showed up when the lockfile was missing or
+ignored (deleted `bun.lock`, or an old Bun that can't read it) and the loose `^4.2.0` range pulled the newest Nuxt.
+
+**Fix (already applied):** scripts now run as `bun --bun nuxt …`, so Node's version no longer matters;
+`engines` and `packageManager` document the versions, and `bun.lock` was regenerated.
+If it still fails:
+
+```bash
+bun upgrade                     # get Bun >= 1.4
+rm -rf node_modules .nuxt       # keep bun.lock
+bun install --frozen-lockfile
+```
+
+The warning about blocked postinstalls for `@parcel/watcher` / `unrs-resolver` is harmless.
 
 ### Environment variables
 
