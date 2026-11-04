@@ -1,6 +1,7 @@
 import { and, eq, ne } from "drizzle-orm";
 import { db } from "~~/server/database/connection";
-import { category, NewCategory } from "~~/server/database/schemas/category.schema";
+import type { NewCategory } from "~~/server/database/schemas/category.schema";
+import { category } from "~~/server/database/schemas/category.schema";
 
 export default defineDbHandler(async (event) => {
   const id = getRouterParam(event, "id");

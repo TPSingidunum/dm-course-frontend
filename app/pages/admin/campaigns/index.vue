@@ -1,48 +1,52 @@
-<!-- Day 4: kampanje — preporučena publika (rule vs ML) sa razlozima + targeting-comparison. -->
+<!-- Day 4: campaigns — recommended audience (rule vs ML) with reasons + targeting comparison. -->
 <template>
-  <div class="p-6">
+  <div class="min-w-0 p-4 sm:p-6">
     <h1 class="text-2xl font-bold mb-4">Campaigns</h1>
     <MlUnavailable v-if="down" />
     <UTable v-else :data="campaigns" :columns="cCols" class="mb-4" data-testid="campaigns-table" />
-    <div class="flex gap-2 items-center mb-4">
-      <USelect v-model="cid" :items="campaigns.map((c: any) => ({ label: c.name, value: c.campaign_id }))" class="w-72" />
-      <UButtonGroup>
+    <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+      <USelect v-model="cid" :items="campaigns.map(c => ({ label: c.name, value: c.campaign_id }))" class="w-full sm:max-w-xs" />
+      <div class="flex items-center gap-2">
         <UButton :variant="mode === 'ml' ? 'solid' : 'outline'" @click="mode = 'ml'">ML</UButton>
         <UButton :variant="mode === 'rule' ? 'solid' : 'outline'" @click="mode = 'rule'">Rule</UButton>
-      </UButtonGroup>
-      <UButton @click="loadAudience" data-testid="load-audience">Prikaži publiku</UButton>
+      </div>
+      <UButton data-testid="load-audience" @click="loadAudience">Show audience</UButton>
     </div>
-    <UAlert v-if="aud?.fallback" color="warning" variant="subtle" class="mb-2"
-      :title="`Publika je rule-based (fallback: ${aud.fallback_reason})`"
-      description="Trenirajte modele na stranicama Segments (Day 2) i Conversion (Day 3)." />
+    <UAlert
+v-if="aud?.fallback" color="warning" variant="subtle" class="mb-2"
+      :title="`Audience is rule-based (fallback: ${aud.fallback_reason})`"
+      description="Train the models on the Segments (Day 2) and Conversion (Day 3) pages." />
     <p v-if="aud" class="text-sm mb-2" data-testid="audience-summary">{{ aud.campaign_name }} · mode {{ aud.mode }} ·
-      kandidata {{ aud.total_candidates }} · izabrano {{ aud.selected }} · prikazano {{ aud.returned }}</p>
+      candidates {{ aud.total_candidates }} · selected {{ aud.selected }} · shown {{ aud.returned }}</p>
     <UTable v-if="aud" :data="audRows" :columns="aCols" class="mb-6" />
     <template v-if="cmp?.metrics">
       <h2 class="text-xl font-bold mb-2">Rule vs ML</h2>
       <UTable :data="cmpRows" :columns="kCols" data-testid="comparison-table" />
-      <p class="text-sm mt-2">lift očekivanih konverzija: {{ cmp.metrics.lift_expected_conversions }} · overlap {{ cmp.metrics.overlap }} · jaccard {{ cmp.metrics.jaccard }}</p>
+      <p class="text-sm mt-2">expected conversions lift: {{ cmp.metrics.lift_expected_conversions }} · overlap {{ cmp.metrics.overlap }} · jaccard {{ cmp.metrics.jaccard }}</p>
     </template>
   </div>
 </template>
 <script lang="ts" setup>
+import type { Audience, Campaign, CampaignRow, TargetingComparison } from '~/types/Ml'
+
 definePageMeta({ layout: 'admin' })
-const campaigns = ref<any[]>([]); const down = ref(false); const cid = ref(1); const mode = ref<'ml' | 'rule'>('ml')
-const aud = ref<any>(null); const cmp = ref<any>(null)
+const campaigns = ref<CampaignRow[]>([]); const down = ref(false); const cid = ref(1); const mode = ref<'ml' | 'rule'>('ml')
+const aud = ref<Audience | null>(null); const cmp = ref<TargetingComparison | null>(null)
 const cCols = ['campaign_id', 'name', 'target_segments', 'eligible_buckets', 'min_probability', 'cost_per_contact', 'max_contacts']
   .map(x => ({ accessorKey: x, header: x }))
 const aCols = ['rank', 'user_id', 'probability', 'segment', 'rfm_bucket', 'monetary', 'score', 'why'].map(x => ({ accessorKey: x, header: x }))
 const kCols = ['mode', 'size', 'expected_conversions', 'expected_profit', 'avg_probability'].map(x => ({ accessorKey: x, header: x }))
-const audRows = computed(() => (aud.value?.audience || []).map((a: any) => ({ ...a, why: (a.reasons || []).join('; ') })))
-const cmpRows = computed(() => cmp.value?.metrics ? ['rule', 'ml'].map(m => ({ mode: m, ...cmp.value.metrics[m] })) : [])
+const audRows = computed(() => (aud.value?.audience || []).map(a => ({ ...a, why: (a.reasons || []).join('; ') })))
+const cmpRows = computed(() => {
+  const metrics = cmp.value?.metrics
+  return metrics ? (['rule', 'ml'] as const).map(m => ({ mode: m, ...metrics[m] })) : []
+})
 async function loadAudience() {
-  // TEACH d04: publika (ml|rule) + rule vs ML poređenje
-  aud.value = await mlGet(`/campaigns/${cid.value}/recommended-audience?mode=${mode.value}&limit=10`)
-  cmp.value = await mlGet(`/campaigns/${cid.value}/targeting-comparison`)
-  // /TEACH
+  aud.value = await mlGet<Audience>(`/campaigns/${cid.value}/recommended-audience?mode=${mode.value}&limit=10`)
+  cmp.value = await mlGet<TargetingComparison>(`/campaigns/${cid.value}/targeting-comparison`)
 }
 onMounted(async () => {
-  const c = await mlGet<any[]>('/campaigns')
+  const c = await mlGet<Campaign[]>('/campaigns')
   if (!c) { down.value = true; return }
   campaigns.value = c.map(x => ({ ...x, target_segments: (x.target_segments || []).join(', '), eligible_buckets: (x.eligible_buckets || []).join(', ') }))
 })

@@ -8,14 +8,17 @@
         <UButton icon="i-lucide-plus" to="/admin/category/create">Create Category</UButton>
       </template>
     </UDashboardNavbar>
-    <div class="p-5 pt-0 flex flex-col flex-1 w-full">
+    <div class="flex w-full flex-1 flex-col p-4 pt-0 sm:p-6 sm:pt-0">
+      <UAlert v-if="categoryError" color="error" variant="subtle" class="mb-3"
+        title="Categories are unavailable" description="The database is not reachable. Start the local database and refresh this page." />
       <div class="flex py-3.5">
         <!-- <UInput :model-value="table?.tableApi?.getColumn('name')?.getFilterValue() as string" class="max-w-sm"
               placeholder="Filter name..."/> -->
         <UInput v-model="globalFilter" class="max-w-sm" placeholder="Filter name..." />
       </div>
 
-      <UTable ref="table" :data="categories" v-model:pagination="pagination" v-model:global-filter="globalFilter"
+      <UTable
+ref="table" v-model:pagination="pagination" v-model:global-filter="globalFilter" :data="categories"
         :columns="columns" :pagination-options="{
           getPaginationRowModel: getPaginationRowModel()
         }" class="flex-1" :ui="{
@@ -27,7 +30,8 @@
           separator: 'h-0'
         }" />
       <div class="flex justify-center border-t border-default pt-4">
-        <UPagination :default-page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
+        <UPagination
+:default-page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
           :items-per-page="table?.tableApi?.getState().pagination.pageSize"
           :total="table?.tableApi?.getFilteredRowModel().rows.length"
           @update:page="(p) => table?.tableApi?.setPageIndex(p - 1)" />
@@ -55,7 +59,10 @@ const { copy } = useClipboard()
 const table = useTemplateRef('table')
 const deleteDialogShow = ref(false);
 const selectedCategoryId = ref(0);
-const categories: Category[] = await $fetch("/api/category");
+const { data: categoryData, error: categoryError } = await useFetch<Category[]>('/api/category', {
+  default: () => []
+})
+const categories = computed(() => categoryData.value ?? [])
 
 async function toggleDeleteDialog(refresh: boolean) {
   deleteDialogShow.value = !deleteDialogShow.value
@@ -99,7 +106,8 @@ const columns: TableColumn<Category>[] = [
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        hour12: false
+        hour12: false,
+        timeZone: 'UTC'
       })
     }
   },
@@ -114,7 +122,8 @@ const columns: TableColumn<Category>[] = [
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        hour12: false
+        hour12: false,
+        timeZone: 'UTC'
       })
     }
   },

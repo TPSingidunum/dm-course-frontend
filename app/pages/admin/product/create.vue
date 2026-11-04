@@ -5,11 +5,13 @@
         <UDashboardSidebarCollapse />
       </template>
     </UDashboardNavbar>
-    <div class="p-5 flex flex-1 w-full overflow-auto h-[90%]">
-      <div class="pb-5">
+    <div class="flex w-full flex-1 flex-col gap-4 p-4 sm:p-6">
+      <UAlert v-if="categoryError" color="error" variant="subtle"
+        title="Categories are unavailable" description="The database is not reachable. Start the local database and refresh this page." />
+      <div>
         <UButton icon="i-lucide-arrow-left-to-line" class="cursor-pointer" @click="router.back" />
       </div>
-      <UCard class="w-full md:w-1/2 mt-60 self-center mx-auto">
+      <UCard class="w-full max-w-3xl self-center">
         <template #header>
           <h1> Creating a new product</h1>
         </template>
@@ -23,7 +25,7 @@
           </UFormField>
 
           <UFormField>
-            <USelect placeholder="Select a category" v-model="state.category_id" :items="categories" class="w-1/2"/>
+            <USelect v-model="state.category_id" placeholder="Select a category" :items="categories" class="w-full"/>
           </UFormField>
           
           <UFormField label="Description" name="description">
@@ -50,7 +52,7 @@
           </UFormField>
 
           <div class="flex justify-end gap-5">
-            <UButton @click="generateSeo" class="cursor-pointer">Generate</UButton>
+            <UButton class="cursor-pointer" @click="generateSeo">Generate</UButton>
             <UButton type="submit" class="cursor-pointer">Create</UButton>
           </div>
         </UForm>
@@ -60,6 +62,8 @@
 </template>
 
 <script lang="ts" setup>
+import type { SeoResponse } from '~/types/Ml'
+import type { Category } from '~/types/Category'
 import type { FormSubmitEvent, SelectItem } from '@nuxt/ui'
 import z from 'zod'
 
@@ -70,10 +74,12 @@ definePageMeta({
 const router = useRouter()
 const form = useTemplateRef('form')
 
-const data = await $fetch("/api/category");
+const { data: categoryData, error: categoryError } = await useFetch<Category[]>('/api/category', {
+  default: () => []
+})
 
-const categories = ref<SelectItem[]>(
-  data.map(cat => {
+const categories = computed<SelectItem[]>(() =>
+  categoryData.value.map(cat => {
     return {
       label: cat.name,
       value: cat.category_id
@@ -83,8 +89,8 @@ const categories = ref<SelectItem[]>(
 
 const schema = z.object({
   name: z.string('Name is required').min(3, 'Must be at least 3 characters').max(64, 'Must be at most 64 characters'),
-  slug: z.string('Slug is required').regex(/^[a-z0-9\-]{3,128}$/, "You slug has to contain only lowercase letters, numbers and a - symbol"),
-  category_id: z.int('Categori required'),
+  slug: z.string('Slug is required').regex(/^[a-z0-9-]{3,128}$/, "Your slug has to contain only lowercase letters, numbers and a - symbol"),
+  category_id: z.int('Category is required'),
   description: z.string('Description is required'),
   img_url: z.httpUrl('Image Link is required'),
   seo_title: z.string('Title is required').min(3, 'Must be at least 3 characters').max(60, 'Must be at most 60 characters'),
@@ -122,11 +128,6 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   })
 }
 
-export interface SeoResponse {
-  title: string
-  description: string
-  keywords: string[]
-}
 
 async function generateSeo() {
 
@@ -135,11 +136,10 @@ async function generateSeo() {
     description: state.description,
   }
 
-  await $fetch("/ml/seo/generate/product", {
+  await $fetch<SeoResponse>("/ml/seo/generate/product", {
     method: "POST",
     body: data
-  }).then((res: any) => {
-    const result: SeoResponse = res
+  }).then((result) => {
     state.seo_title = result.title
     state.seo_description = result.description
     state.seo_keywords = result.keywords

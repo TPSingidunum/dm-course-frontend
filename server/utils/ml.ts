@@ -1,4 +1,4 @@
-// Server-side poziv dm-ml API-ja (best-effort). Bazni URL: runtimeConfig.mlApiUrl (env NUXT_ML_API_URL).
+// Server-side ML API call (best-effort). Base URL: runtimeConfig.mlApiUrl (env NUXT_ML_API_URL).
 export function mlApiUrl(): string {
     return String(useRuntimeConfig().mlApiUrl || "http://127.0.0.1:3001").replace(/\/$/, "")
 }
@@ -10,7 +10,7 @@ export async function forwardToMl(path: string, body: unknown): Promise<{ ok: bo
             signal: AbortSignal.timeout(3000),
         })
         return { ok: r.ok, status: r.status }
-    } catch (e: any) {
-        return { ok: false, error: String(e?.message || e) }
+    } catch (e: unknown) {
+        return { ok: false, error: e instanceof Error ? (e.message || String(e)) : String(e) }
     }
 }

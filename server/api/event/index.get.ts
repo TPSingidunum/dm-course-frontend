@@ -2,7 +2,7 @@ import { desc, eq, sql } from "drizzle-orm";
 import { db } from "~~/server/database/connection";
 import { event } from "~~/server/database/schemas/event.schema";
 
-// Admin: poslednji događaji + brojanje po tipu (provera da tracking radi).
+// Admin: latest events + counts per type (checks that tracking works).
 export default defineDbHandler(async (h) => {
     const q = getQuery(h)
     const limit = Math.min(Number(q.limit || 50), 500)

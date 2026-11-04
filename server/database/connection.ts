@@ -5,8 +5,8 @@ import * as seoSchema from "../database/schemas/seo.schema"
 import * as eventSchema from "../database/schemas/event.schema"
 import * as categorySchema from "../database/schemas/category.schema"
 
-// Podrazumevano LOKALNA MariaDB iz db/ (start_local_db.sh, port 3307).
-// Prava baza se NE koristi; DB_* promenljive mogu da preusmere na drugu lokalnu bazu.
+// Defaults to the LOCAL MariaDB from docker-compose.yml (port 3307).
+// No real database is used; the DB_* variables can point it at another local database.
 const connection = mysql.createPool({
     host: process.env.DB_HOST || "127.0.0.1",
     port: Number(process.env.DB_PORT || 3307),

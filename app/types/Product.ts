@@ -6,7 +6,8 @@ export interface Product {
   description: string
   category_id: number
   price: number | null
-  seo?: Seo
+  seo_id?: number
+  seo?: Seo | null
 }
 
 export interface Seo {
@@ -15,7 +16,7 @@ export interface Seo {
   key_words: string[]
 }
 
-// dm-ml preporuka (neki endpoint-i vraćaju samo product_id/name/score -> dopuni iz kataloga)
+// ML API recommendation (some endpoints only return product_id/name/score -> enrich from the catalog)
 export interface Rec {
   product_id: number
   name: string

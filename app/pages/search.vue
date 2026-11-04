@@ -1,21 +1,21 @@
-<!-- Day 10: semantička pretraga (GET /ml/search/semantic?q=...) -->
+<!-- Day 10: semantic search (GET /ml/search/semantic?q=...) -->
 <template>
-  <div class="px-10 py-6">
-    <h1 class="text-2xl font-bold mb-4">Search</h1>
-    <form class="flex gap-2 mb-4" @submit.prevent="search">
-      <UInput v-model="q" placeholder="npr. wireless earbuds for travel" class="w-96" data-testid="search-input" />
+  <div class="mx-auto w-full max-w-7xl space-y-5 px-4 py-6 sm:px-6 lg:px-8">
+    <h1 class="text-2xl font-bold">Search</h1>
+    <form class="flex flex-col gap-2 sm:flex-row" @submit.prevent="search">
+      <UInput v-model="q" placeholder="e.g. wireless earbuds for travel" class="w-full sm:max-w-xl" data-testid="search-input" />
       <UButton type="submit">Search</UButton>
     </form>
-    <div v-if="res" class="flex gap-2 mb-4" data-testid="search-meta">
+    <div v-if="res" class="flex flex-wrap gap-2" data-testid="search-meta">
       <UBadge variant="subtle">{{ res.method }}</UBadge>
       <UBadge v-if="embedder" variant="subtle">{{ embedder }}</UBadge>
       <UBadge v-if="res.fallback" color="warning">fallback: {{ res.fallback_reason }}</UBadge>
     </div>
     <p v-if="error" class="text-error">{{ error }}</p>
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
       <UCard v-for="(r, i) in results" :key="r.product_id">
         <NuxtLink :to="`/product/${r.slug}`" @click="trackRecommendationClick(r.product_id, 'semantic', i + 1)">
-          <NuxtImg class="w-full h-24 object-cover" :src="r.img_url" />
+          <NuxtImg class="aspect-[4/3] w-full rounded-md object-cover" :src="r.img_url" />
           <p class="font-bold mt-2 text-sm">{{ r.name }}</p>
           <p class="text-xs text-muted">score {{ r.score }}</p>
           <p class="font-bold">{{ formatPrice(r.price) }}</p>
@@ -27,18 +27,17 @@
 
 <script lang="ts" setup>
 import type { Rec } from '~/types/Product'
+import type { SemanticSearch } from '~/types/Ml'
 const route = useRoute()
 const q = ref(String(route.query.q || ""))
-const res = ref<any>(null); const error = ref(""); const results = ref<Rec[]>([]); const embedder = ref("")
+const res = ref<SemanticSearch | null>(null); const error = ref(""); const results = ref<Rec[]>([]); const embedder = ref("")
 async function search() {
   if (!q.value.trim()) return
-  // TEACH d10: semantička pretraga (GET /search/semantic)
   await trackSearchEvent()
-  const r = await mlGet<any>(`/search/semantic?q=${encodeURIComponent(q.value)}&limit=10`)
-  if (!r) { error.value = "dm-ml nedostupan — pretraga trenutno ne radi"; results.value = []; return }
+  const r = await mlGet<SemanticSearch>(`/search/semantic?q=${encodeURIComponent(q.value)}&limit=10`)
+  if (!r) { error.value = "ML API unavailable — search is currently not working"; results.value = []; return }
   error.value = ""; res.value = r; results.value = enrich(r.results, (await useCatalog()).value)
   embedder.value = r.embedder || ""
-  // /TEACH
 }
 onMounted(() => { if (q.value) search() })
 </script>

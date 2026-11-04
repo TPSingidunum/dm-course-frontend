@@ -1,10 +1,10 @@
-<!-- Day 11: generisanje SEO sadržaja (POST /ml/ai/seo) sa validacijom i template fallback-om. -->
+<!-- Day 11: SEO content generation (POST /ml/ai/seo) with validation and a template fallback. -->
 <template>
-  <div class="p-6">
+  <div class="min-w-0 p-4 sm:p-6">
     <h1 class="text-2xl font-bold mb-4">AI content (SEO)</h1>
-    <div class="flex gap-2 items-center mb-4">
-      <USelect v-model="pid" :items="products.map(p => ({ label: p.name, value: p.product_id }))" class="w-80" />
-      <UButton :loading="busy" @click="generate" data-testid="generate-seo">Generate SEO</UButton>
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <USelect v-model="pid" :items="products.map(p => ({ label: p.name, value: p.product_id }))" class="w-full sm:max-w-md" />
+      <UButton :loading="busy" data-testid="generate-seo" @click="generate">Generate SEO</UButton>
     </div>
     <p v-if="err" class="text-error">{{ err }}</p>
     <UCard v-if="out" data-testid="seo-result">
@@ -17,20 +17,20 @@
 </template>
 <script lang="ts" setup>
 import type { Product } from '~/types/Product'
+import type { Category } from '~/types/Category'
+import type { SeoResult } from '~/types/Ml'
 definePageMeta({ layout: 'admin' })
-const products = ref<Product[]>([]); const pid = ref(1); const out = ref<any>(null); const err = ref(""); const busy = ref(false)
+const products = ref<Product[]>([]); const pid = ref(1); const out = ref<SeoResult | null>(null); const err = ref(""); const busy = ref(false)
 const catNames = ref<Record<number, string>>({})
 onMounted(async () => {
   products.value = Object.values((await useCatalog()).value)
-  const cats = await $fetch<any[]>('/api/category').catch(() => [])
-  catNames.value = Object.fromEntries(cats.map((c: any) => [c.category_id, c.name]))
+  const cats = await $fetch<Category[]>('/api/category').catch((): Category[] => [])
+  catNames.value = Object.fromEntries(cats.map(c => [c.category_id, c.name]))
 })
 async function generate() {
-  // TEACH d11: POST /ai/seo (validacija + fallback su u API-ju)
   const p = products.value.find(x => x.product_id === pid.value); if (!p) return
   busy.value = true
-  const r = await mlPost('/ai/seo', { product_name: p.name, description: p.description, category_name: catNames.value[p.category_id] || '' })
-  busy.value = false; err.value = r.error ? `dm-ml: ${r.error}` : ''; out.value = r.data
-  // /TEACH
+  const r = await mlPost<SeoResult>('/ai/seo', { product_name: p.name, description: p.description, category_name: catNames.value[p.category_id] || '' })
+  busy.value = false; err.value = r.error ? `ML API: ${r.error}` : ''; out.value = r.data
 }
 </script>

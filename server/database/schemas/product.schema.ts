@@ -9,7 +9,7 @@ export const product = mysqlTable("product", {
     img_url: text("img_url").notNull(),
     slug: varchar("slug", { length: 255}).notNull(),
     category_id: int("category_id").notNull(),
-    // Day 5: cena iz kataloga (ranije hardkodovano "15$"); NULL dozvoljen za stare redove
+    // Day 5: price from the catalog (previously hardcoded "15$"); NULL allowed for old rows
     price: decimal("price", { precision: 10, scale: 2, mode: "number" }),
     seo_id: int("seo_id").notNull().references(() => seo.seo_id),
     created_at: timestamp("created_at").defaultNow(),

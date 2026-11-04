@@ -12,7 +12,7 @@
   </main>
 
   <UFooter>
-    <p class="text-muted text-sm">Copyright © {{ new Date().getFullYear() }}</p>
+    <p class="text-muted text-sm">Copyright © {{ new Date().getUTCFullYear() }}</p>
   </UFooter>
 </template>
 

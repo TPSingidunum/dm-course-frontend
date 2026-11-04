@@ -1,4 +1,4 @@
-<!-- Sekcija preporuka: loguje impresije (jednom) i klikove sa recommendation_source + pozicijom (Day 1/9). -->
+<!-- Recommendation section: logs impressions (once) and clicks with recommendation_source + position (Day 1/9). -->
 <template>
   <div v-if="items.length" class="mt-10" :data-testid="`rec-${source}`">
     <div class="flex items-center gap-2 mb-4">
@@ -7,10 +7,10 @@
       <UBadge v-if="fallback" color="warning" variant="subtle">showing popularity fallback</UBadge>
       <span v-if="note" class="text-sm text-muted">{{ note }}</span>
     </div>
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
       <UCard v-for="(rec, i) in items" :key="rec.product_id">
         <NuxtLink :to="`/product/${rec.slug}`" @click="trackRecommendationClick(rec.product_id, source, i + 1)">
-          <NuxtImg class="w-full h-24 object-cover" :src="rec.img_url" />
+          <NuxtImg class="aspect-[4/3] w-full rounded-md object-cover" :src="rec.img_url" />
           <p class="font-bold mt-2 text-sm">{{ rec.name }}</p>
           <p class="text-xs text-gray-600">{{ rec.description?.substring(0, 50) }}</p>
           <p class="font-bold mt-1">{{ formatPrice(rec.price) }}</p>

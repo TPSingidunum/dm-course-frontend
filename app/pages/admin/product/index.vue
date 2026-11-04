@@ -8,12 +8,15 @@
         <UButton icon="i-lucide-plus" to="/admin/product/create">Create Product</UButton>
       </template>
     </UDashboardNavbar>
-    <div class="p-5 pt-0 flex flex-col flex-1 w-full">
+    <div class="flex w-full flex-1 flex-col p-4 pt-0 sm:p-6 sm:pt-0">
+      <UAlert v-if="productError" color="error" variant="subtle" class="mb-3"
+        title="Products are unavailable" description="The database is not reachable. Start the local database and refresh this page." />
       <div class="flex py-3.5">
         <UInput v-model="globalFilter" class="max-w-sm" placeholder="Filter name..." />
       </div>
 
-      <UTable ref="table" :data="products" v-model:pagination="pagination" v-model:global-filter="globalFilter"
+      <UTable
+ref="table" v-model:pagination="pagination" v-model:global-filter="globalFilter" :data="products"
         :columns="columns" :pagination-options="{
           getPaginationRowModel: getPaginationRowModel()
         }" class="flex-1" :ui="{
@@ -25,7 +28,8 @@
           separator: 'h-0'
         }" />
       <div class="flex justify-center border-t border-default pt-4">
-        <UPagination :default-page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
+        <UPagination
+:default-page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
           :items-per-page="table?.tableApi?.getState().pagination.pageSize"
           :total="table?.tableApi?.getFilteredRowModel().rows.length"
           @update:page="(p) => table?.tableApi?.setPageIndex(p - 1)" />
@@ -38,7 +42,6 @@
 <script lang="ts" setup>
 import type { TableColumn } from '@nuxt/ui';
 import { getPaginationRowModel, type Row } from '@tanstack/vue-table'
-import { useClipboard } from '@vueuse/core'
 import type { Product } from '~/types/Product';
 
 const UButton = resolveComponent('UButton')
@@ -48,12 +51,13 @@ definePageMeta({
   layout: 'admin'
 })
 
-const toast = useToast()
-const { copy } = useClipboard()
 const table = useTemplateRef('table')
 const deleteDialogShow = ref(false);
 const selectedProductId = ref(0);
-const products: Product[] = await $fetch("/api/shop");
+const { data: productData, error: productError } = await useFetch<Product[]>('/api/shop', {
+  default: () => []
+})
+const products = computed(() => productData.value ?? [])
 
 async function toggleDeleteDialog(refresh: boolean) {
   deleteDialogShow.value = !deleteDialogShow.value
@@ -102,7 +106,8 @@ const columns: TableColumn<Product>[] = [
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        hour12: false
+        hour12: false,
+        timeZone: 'UTC'
       })
     }
   },
@@ -117,7 +122,8 @@ const columns: TableColumn<Product>[] = [
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        hour12: false
+        hour12: false,
+        timeZone: 'UTC'
       })
     }
   },
