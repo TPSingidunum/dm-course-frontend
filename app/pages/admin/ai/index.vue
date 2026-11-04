@@ -1,9 +1,9 @@
 <!-- Day 11: SEO content generation (POST /ml/ai/seo) with validation and a template fallback. -->
 <template>
-  <div class="p-6">
+  <div class="min-w-0 p-4 sm:p-6">
     <h1 class="text-2xl font-bold mb-4">AI content (SEO)</h1>
-    <div class="flex gap-2 items-center mb-4">
-      <USelect v-model="pid" :items="products.map(p => ({ label: p.name, value: p.product_id }))" class="w-80" />
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <USelect v-model="pid" :items="products.map(p => ({ label: p.name, value: p.product_id }))" class="w-full sm:max-w-md" />
       <UButton :loading="busy" data-testid="generate-seo" @click="generate">Generate SEO</UButton>
     </div>
     <p v-if="err" class="text-error">{{ err }}</p>

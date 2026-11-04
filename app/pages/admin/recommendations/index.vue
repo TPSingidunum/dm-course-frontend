@@ -1,7 +1,7 @@
 <!-- Day 7 (offline evaluation) + Day 9 (CTR, popular vs personalized). -->
 <template>
-  <div class="p-6">
-    <div class="flex items-center gap-4 mb-4">
+  <div class="min-w-0 p-4 sm:p-6">
+    <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
       <h1 class="text-2xl font-bold">Recommendations</h1>
       <UButton to="/admin/recommendations/hybrid" variant="outline">Hybrid (Day 8)</UButton>
     </div>
@@ -11,7 +11,7 @@
         test sessions {{ report.n_test_sessions }} · train/test events {{ report.n_train_events }} / {{ report.n_test_events }}</p>
       <UTable :data="report.comparison" :columns="cols" class="mb-6" data-testid="eval-table" />
     </template>
-    <div class="grid grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-6">
       <UCard v-if="ctr" data-testid="ctr-card">
         <template #header>CTR (impression log) — overall {{ ctr.overall.ctr }} ({{ ctr.overall.clicks }}/{{ ctr.overall.impressions }})</template>
         <UTable :data="ctr.by_algorithm.groups" :columns="ctrCols" class="mb-2" />

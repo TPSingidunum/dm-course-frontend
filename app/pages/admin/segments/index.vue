@@ -1,7 +1,7 @@
 <!-- Day 2: segmentation — training, segment profiles, manual RFM vs K-Means. -->
 <template>
-  <div class="p-6">
-    <div class="flex items-center gap-4 mb-4">
+  <div class="min-w-0 p-4 sm:p-6">
+    <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
       <h1 class="text-2xl font-bold">Customer segments</h1>
       <UInput v-model.number="k" type="number" class="w-20" />
       <UButton :loading="busy" data-testid="train-segments" @click="train">Train (k={{ k }})</UButton>

@@ -5,11 +5,15 @@
         <UDashboardSidebarCollapse />
       </template>
     </UDashboardNavbar>
-    <div class="p-5 flex flex-1 w-full overflow-auto h-[90%]">
-      <div class="pb-5">
+    <div class="flex w-full flex-1 flex-col gap-4 p-4 sm:p-6">
+      <UAlert v-if="productError" color="error" variant="subtle"
+        title="Product is unavailable" description="The database is not reachable. Start the local database and refresh this page." />
+      <UAlert v-if="categoryError" color="error" variant="subtle"
+        title="Categories are unavailable" description="The database is not reachable. Start the local database and refresh this page." />
+      <div>
         <UButton icon="i-lucide-arrow-left-to-line" class="cursor-pointer" @click="router.back" />
       </div>
-      <UCard class="w-full md:w-1/2 mt-60 self-center mx-auto">
+      <UCard class="w-full max-w-3xl self-center">
         <template #header>
           <h1> Updating product {{ data?.product_id }}</h1>
         </template>
@@ -23,7 +27,7 @@
           </UFormField>
 
           <UFormField>
-            <USelect v-model="state.category_id" placeholder="Select a category" :items="categories" class="w-1/2"/>
+            <USelect v-model="state.category_id" placeholder="Select a category" :items="categories" class="w-full"/>
           </UFormField>
           
           <UFormField label="Description" name="description">
@@ -61,6 +65,7 @@
 
 <script lang="ts" setup>
 import type { Product } from '~/types/Product'
+import type { Category } from '~/types/Category'
 import type { SeoResponse } from '~/types/Ml'
 import type { FormSubmitEvent, SelectItem } from '@nuxt/ui'
 import z from 'zod'
@@ -74,13 +79,13 @@ const route = useRoute();
 const id = route.params.id;
 const form = useTemplateRef('form')
 
-const { data } = await useFetch<Product>('/api/product/id/' + id)
-const categoriesData = await $fetch("/api/category");
-console.log(data)
-console.log(categoriesData)
+const { data, error: productError } = await useFetch<Product>('/api/product/id/' + id)
+const { data: categoryData, error: categoryError } = await useFetch<Category[]>('/api/category', {
+  default: () => []
+})
 
-const categories = ref<SelectItem[]>(
-  categoriesData.map(cat => {
+const categories = computed<SelectItem[]>(() =>
+  categoryData.value.map(cat => {
     return {
       label: cat.name,
       value: cat.category_id
@@ -91,7 +96,7 @@ const categories = ref<SelectItem[]>(
 const schema = z.object({
   name: z.string('Name is required').min(3, 'Must be at least 3 characters').max(64, 'Must be at most 64 characters'),
   slug: z.string('Slug is required').regex(/^[a-z0-9-]{3,128}$/, "Your slug has to contain only lowercase letters, numbers and a - symbol"),
-  category_id: z.int('Categori required'),
+  category_id: z.int('Category is required'),
   description: z.string('Description is required'),
   seo_id: z.int(),
   img_url: z.httpUrl('Image Link is required'),

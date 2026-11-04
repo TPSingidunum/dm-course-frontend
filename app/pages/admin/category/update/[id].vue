@@ -5,11 +5,13 @@
         <UDashboardSidebarCollapse />
       </template>
     </UDashboardNavbar>
-    <div class="p-5 flex flex-col flex-1 w-full">
-      <div class="pb-5">
+    <div class="flex w-full flex-1 flex-col gap-4 p-4 sm:p-6">
+      <UAlert v-if="error" color="error" variant="subtle"
+        title="Category is unavailable" description="The database is not reachable. Start the local database and refresh this page." />
+      <div>
         <UButton icon="i-lucide-arrow-left-to-line" class="cursor-pointer" @click="router.back" />
       </div>
-      <UCard class="w-full md:w-1/2 self-center">
+      <UCard class="w-full max-w-2xl self-center">
         <template #header>
           <h1> Updating category {{ data?.category_id }}</h1>
         </template>
@@ -49,7 +51,7 @@ const route = useRoute();
 const id = route.params.id;
 const form = useTemplateRef('form')
 
-const { data } = await useFetch<Category>('/api/category/id/' + id)
+const { data, error } = await useFetch<Category>('/api/category/id/' + id)
 
 const schema = z.object({
   name: z.string('Name is required').min(3, 'Must be at least 3 characters').max(64, 'Must be at most 64 characters'),

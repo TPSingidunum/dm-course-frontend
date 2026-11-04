@@ -8,7 +8,9 @@
         <UButton icon="i-lucide-plus" to="/admin/product/create">Create Product</UButton>
       </template>
     </UDashboardNavbar>
-    <div class="p-5 pt-0 flex flex-col flex-1 w-full">
+    <div class="flex w-full flex-1 flex-col p-4 pt-0 sm:p-6 sm:pt-0">
+      <UAlert v-if="productError" color="error" variant="subtle" class="mb-3"
+        title="Products are unavailable" description="The database is not reachable. Start the local database and refresh this page." />
       <div class="flex py-3.5">
         <UInput v-model="globalFilter" class="max-w-sm" placeholder="Filter name..." />
       </div>
@@ -52,7 +54,10 @@ definePageMeta({
 const table = useTemplateRef('table')
 const deleteDialogShow = ref(false);
 const selectedProductId = ref(0);
-const products = await $fetch<Product[]>("/api/shop");
+const { data: productData, error: productError } = await useFetch<Product[]>('/api/shop', {
+  default: () => []
+})
+const products = computed(() => productData.value ?? [])
 
 async function toggleDeleteDialog(refresh: boolean) {
   deleteDialogShow.value = !deleteDialogShow.value
@@ -101,7 +106,8 @@ const columns: TableColumn<Product>[] = [
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        hour12: false
+        hour12: false,
+        timeZone: 'UTC'
       })
     }
   },
@@ -116,7 +122,8 @@ const columns: TableColumn<Product>[] = [
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        hour12: false
+        hour12: false,
+        timeZone: 'UTC'
       })
     }
   },

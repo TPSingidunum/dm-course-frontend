@@ -1,15 +1,15 @@
 <!-- Day 4: campaigns — recommended audience (rule vs ML) with reasons + targeting comparison. -->
 <template>
-  <div class="p-6">
+  <div class="min-w-0 p-4 sm:p-6">
     <h1 class="text-2xl font-bold mb-4">Campaigns</h1>
     <MlUnavailable v-if="down" />
     <UTable v-else :data="campaigns" :columns="cCols" class="mb-4" data-testid="campaigns-table" />
-    <div class="flex gap-2 items-center mb-4">
-      <USelect v-model="cid" :items="campaigns.map(c => ({ label: c.name, value: c.campaign_id }))" class="w-72" />
-      <UButtonGroup>
+    <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+      <USelect v-model="cid" :items="campaigns.map(c => ({ label: c.name, value: c.campaign_id }))" class="w-full sm:max-w-xs" />
+      <div class="flex items-center gap-2">
         <UButton :variant="mode === 'ml' ? 'solid' : 'outline'" @click="mode = 'ml'">ML</UButton>
         <UButton :variant="mode === 'rule' ? 'solid' : 'outline'" @click="mode = 'rule'">Rule</UButton>
-      </UButtonGroup>
+      </div>
       <UButton data-testid="load-audience" @click="loadAudience">Show audience</UButton>
     </div>
     <UAlert

@@ -5,11 +5,11 @@
         <UDashboardSidebarCollapse />
       </template>
     </UDashboardNavbar>
-    <div class="p-5 flex flex-col flex-1 w-full">
-      <div class="pb-5">
+    <div class="flex w-full flex-1 flex-col gap-4 p-4 sm:p-6">
+      <div>
         <UButton icon="i-lucide-arrow-left-to-line" class="cursor-pointer" @click="router.back" />
       </div>
-      <UCard class="w-full md:w-1/2 self-center">
+      <UCard class="w-full max-w-2xl self-center">
         <template #header>
           <h1> Creating a new category</h1>
         </template>

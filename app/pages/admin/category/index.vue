@@ -8,7 +8,9 @@
         <UButton icon="i-lucide-plus" to="/admin/category/create">Create Category</UButton>
       </template>
     </UDashboardNavbar>
-    <div class="p-5 pt-0 flex flex-col flex-1 w-full">
+    <div class="flex w-full flex-1 flex-col p-4 pt-0 sm:p-6 sm:pt-0">
+      <UAlert v-if="categoryError" color="error" variant="subtle" class="mb-3"
+        title="Categories are unavailable" description="The database is not reachable. Start the local database and refresh this page." />
       <div class="flex py-3.5">
         <!-- <UInput :model-value="table?.tableApi?.getColumn('name')?.getFilterValue() as string" class="max-w-sm"
               placeholder="Filter name..."/> -->
@@ -57,7 +59,10 @@ const { copy } = useClipboard()
 const table = useTemplateRef('table')
 const deleteDialogShow = ref(false);
 const selectedCategoryId = ref(0);
-const categories = await $fetch<Category[]>("/api/category");
+const { data: categoryData, error: categoryError } = await useFetch<Category[]>('/api/category', {
+  default: () => []
+})
+const categories = computed(() => categoryData.value ?? [])
 
 async function toggleDeleteDialog(refresh: boolean) {
   deleteDialogShow.value = !deleteDialogShow.value
@@ -101,7 +106,8 @@ const columns: TableColumn<Category>[] = [
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        hour12: false
+        hour12: false,
+        timeZone: 'UTC'
       })
     }
   },
@@ -116,7 +122,8 @@ const columns: TableColumn<Category>[] = [
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        hour12: false
+        hour12: false,
+        timeZone: 'UTC'
       })
     }
   },

@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <h1>Admin</h1>
+  <div class="p-4 sm:p-6">
+    <h1 class="text-2xl font-bold">Admin</h1>
   </div>
 </template>
 

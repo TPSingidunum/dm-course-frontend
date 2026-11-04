@@ -1,9 +1,9 @@
 <!-- Day 3: conversion model — training, metrics + baseline, leakage before/after, per-user prediction. -->
 <template>
-  <div class="p-6">
-    <div class="flex items-center gap-4 mb-4">
+  <div class="min-w-0 p-4 sm:p-6">
+    <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
       <h1 class="text-2xl font-bold">Conversion model</h1>
-      <USelect v-model="modelType" :items="['logistic_regression', 'random_forest']" class="w-56" />
+      <USelect v-model="modelType" :items="['logistic_regression', 'random_forest']" class="w-full sm:max-w-56" />
       <UButton :loading="busy" data-testid="train-conversion" @click="train">Train</UButton>
     </div>
     <MlUnavailable v-if="down" />

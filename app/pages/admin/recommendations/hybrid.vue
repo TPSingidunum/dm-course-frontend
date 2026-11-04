@@ -1,6 +1,6 @@
 <!-- Day 8: user-based evaluation of the hybrid pipeline vs individual sources. -->
 <template>
-  <div class="p-6">
+  <div class="min-w-0 p-4 sm:p-6">
     <h1 class="text-2xl font-bold mb-4">Hybrid recommender (user-based evaluation)</h1>
     <MlUnavailable v-if="!rep && loaded" />
     <template v-if="rep">
