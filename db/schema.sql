@@ -1,7 +1,5 @@
--- Lokalna šema za dm-frontend (MariaDB/MySQL 8 kompatibilno). Usklađena sa drizzle šemama u
--- dm-frontend/server/database/schemas/*.ts i sa Day 1 event šemom (12 polja).
 SET NAMES utf8mb4;
-DROP TABLE IF EXISTS event;
+DROP TABLE IF EXISTS `event`;
 DROP TABLE IF EXISTS product;
 DROP TABLE IF EXISTS seo;
 DROP TABLE IF EXISTS category;
@@ -39,8 +37,7 @@ CREATE TABLE product (
   INDEX idx_product_category (category_id)
 );
 
--- Day 1: proširena event tabela (stara polja event_type/user_session/product_id ostaju)
-CREATE TABLE event (
+CREATE TABLE `event` (
   event_id INT PRIMARY KEY AUTO_INCREMENT,
   event_type VARCHAR(50) NOT NULL,
   user_id INT NULL,
