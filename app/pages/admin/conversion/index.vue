@@ -15,7 +15,8 @@ v-else-if="!status" color="info" variant="subtle" title="Model not trained"
       <p class="text-sm mb-2">{{ status.model_type }} · window {{ status.window_days }} d · cutoff {{ status.cutoff }} ·
         train {{ status.n_train }} / test {{ status.n_test }} · base rate {{ status.base_rate }}</p>
       <UTable :data="metricRows" :columns="mCols" class="mb-4" data-testid="metrics-table" />
-      <p class="text-sm mb-4">Confusion matrix (model): {{ status.metrics.confusion_matrix }} · baseline: {{ status.baseline.confusion_matrix }}</p>
+      <!-- <p class="text-sm mb-4">Confusion matrix (model): {{ status.metrics.confusion_matrix }} · baseline: {{ status.baseline.confusion_matrix }}</p> -->
+      <p class="text-sm mb-4">Confusion matrix (model): {{ status.metrics.confusion_matrix }}</p>
       <template v-if="leak">
         <h2 class="text-xl font-bold mb-2">Leakage: clean vs leaky</h2>
         <UTable :data="leakRows" :columns="mCols" class="mb-6" />
