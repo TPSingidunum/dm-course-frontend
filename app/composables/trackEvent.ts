@@ -61,9 +61,10 @@ export const trackCategoryView = (category_id: number) =>
 export const trackSearchEvent = () => trackEvent({ event_type: "search", source: "search_page" })
 export const addToShoppingCartEvent = (p: P, quantity = 1, source = "product_page") =>
     trackEvent({ event_type: "add_to_cart", ...p, quantity, source })
-export const removeFromCartEvent = (p: P) => trackEvent({ event_type: "remove_from_cart", ...p, source: "cart" })
-export const buyProductEvent = (p: P, quantity = 1) =>
-    trackEvent({ event_type: "purchase", ...p, quantity, source: "cart" })
+export const removeFromCartEvent = (p: P, quantity = 1) =>
+    trackEvent({ event_type: "remove_from_cart", ...p, quantity, source: "cart" })
+export const buyProductEvent = (p: P, quantity = 1, source = "cart") =>
+    trackEvent({ event_type: "purchase", ...p, quantity, source })
 export const trackRecommendationImpression = (product_id: number, recommendation_source: string, position: number) =>
     trackEvent({ event_type: "recommendation_impression", product_id, recommendation_source,
                  recommendation_position: position, source: "recommendation" })

@@ -46,3 +46,10 @@ export function formatPrice(p: number | null | undefined) {
 export function errorMessage(e: unknown): string {
     return e instanceof Error ? (e.message || String(e)) : String(e)
 }
+
+// Show a `{ data: { data: { field, message } } }` server validation error on the matching form field.
+export function showServerError(form: { setErrors: (errors: { name: string, message: string }[]) => void } | null | undefined, e: unknown) {
+  const d = (e as { data?: { data?: { field?: string, message?: string } } })?.data?.data
+  if (d?.field && d.message) form?.setErrors([{ name: d.field, message: d.message }])
+  else useToast().add({ title: 'Something went wrong', description: errorMessage(e), color: 'error' })
+}

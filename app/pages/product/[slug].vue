@@ -1,96 +1,98 @@
 <template>
-  <div class="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
-    <div class="pb-4">
-      <UButton icon="i-lucide-arrow-left-to-line" aria-label="Go back" @click="router.back" />
-    </div>
-    <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-      <div class="min-w-0 space-y-6 lg:col-span-2">
-        <NuxtImg class="mx-auto aspect-[4/3] w-full max-w-3xl rounded-lg object-cover" :src="data.img_url" />
-        <p>{{ data.description }}</p>
-
-        <!-- Day 12: Platform section (AI description with fallback + module_class) -->
-        <UCard v-if="platform" data-testid="platform-section">
-          <p class="text-sm text-muted">Platform · {{ platform.ai_description?.source }}
-            <span v-if="platform.ai_description?.fallback">(fallback: {{ platform.ai_description?.fallback_reason }})</span></p>
-          <p>{{ platform.ai_description?.content }}</p>
-        </UCard>
-
-        <RecSection title="Recommended Products" source="content" :items="content" :fallback="contentFallback" />
-        <RecSection title="Customers Also Viewed" source="collaborative" :items="collab" :fallback="collabFallback" />
-        <RecSection
-          title="Based on your session" source="session" :items="session" :fallback="sessionFallback"
-          :note="sessionFallback ? 'not enough signals in the session' : ''" />
-        <RecSection title="Semantically similar" source="semantic" :items="semantic" />
+  <StorePage back>
+    <div class="grid gap-x-8 gap-y-6 lg:grid-cols-3">
+      <div class="aspect-[4/3] w-full overflow-hidden rounded-lg bg-elevated lg:col-span-2">
+        <NuxtImg :src="data.img_url" :alt="data.name" class="size-full object-contain" />
       </div>
-      <aside class="min-w-0">
-        <div class="space-y-4 rounded-lg border border-default p-5 lg:sticky lg:top-4">
+
+      <!-- Buy box sits right under the image on mobile and in the right column on desktop. -->
+      <aside class="min-w-0 lg:col-start-3 lg:row-span-2 lg:row-start-1">
+        <div class="space-y-4 rounded-lg border border-default p-5 lg:sticky lg:top-20">
           <UBadge color="error">Sale</UBadge>
-          <p class="text-2xl font-bold" data-testid="product-name">{{ data.name }}</p>
+          <h1 class="text-2xl font-bold" data-testid="product-name">{{ data.name }}</h1>
           <p class="text-2xl font-bold" data-testid="product-price">{{ formatPrice(data.price) }}</p>
-          <UButton class="w-full cursor-pointer" @click="addToCart">Add to cart</UButton>
-          <UButton v-if="inCart" variant="ghost" class="w-full cursor-pointer" @click="removeFromCart">Remove from cart</UButton>
-          <UButton variant="outline" class="w-full cursor-pointer" @click="buy">Buy</UButton>
+          <div class="flex flex-col gap-2">
+            <UButton block @click="cart.add(data)">Add to cart</UButton>
+            <UButton :to="`/buy/${data.slug}`" block variant="outline">Buy now</UButton>
+            <template v-if="inCart">
+              <UButton to="/checkout" block color="neutral" variant="soft">Go to checkout ({{ inCart.quantity }} in cart)</UButton>
+              <UButton block color="neutral" variant="ghost" @click="cart.remove(data.product_id)">Remove from cart</UButton>
+            </template>
+          </div>
         </div>
       </aside>
+
+      <div class="min-w-0 space-y-6 lg:col-span-2">
+        <p class="text-muted">{{ data.description }}</p>
+
+        <!-- Platform section (AI description with fallback + module_class) -->
+        <UCard v-if="platform" data-testid="platform-section">
+          <p class="mb-1 text-sm text-muted">
+            Platform · {{ platform.ai_description?.source }}
+            <span v-if="platform.ai_description?.fallback">(fallback: {{ platform.ai_description?.fallback_reason }})</span>
+          </p>
+          <p>{{ platform.ai_description?.content }}</p>
+        </UCard>
+      </div>
     </div>
-  </div>
+
+    <RecSection
+      v-for="s in sections" :key="s.source" :title="s.title" :source="s.source" :items="s.items"
+      :fallback="s.fallback" :note="s.fallback ? s.note : ''" />
+  </StorePage>
 </template>
 
 <script lang="ts" setup>
-import type { Product, Rec } from '~/types/Product';
-import type { ProductPlatform, RecList } from '~/types/Ml';
+import type { Product, Rec } from '~/types/Product'
+import type { ProductPlatform, RecList } from '~/types/Ml'
 
-const router = useRouter()
 const route = useRoute()
-const toast = useToast()
-const slug = route.params.slug;
+const slug = route.params.slug
 
-const { data: productData, error: productError } = await useFetch<Product>(`/api/product/${slug}`)
-const data = productData.value!
-if (!data) {
+const { data: fetched, error } = await useFetch<Product>(`/api/product/${slug}`)
+if (!fetched.value) {
   throw createError({
-    statusCode: productError.value?.statusCode || 404,
-    statusMessage: productError.value?.statusMessage || 'Product not found'
+    statusCode: error.value?.statusCode || 404,
+    statusMessage: error.value?.statusMessage || 'Product not found'
   })
 }
+const data: Product = fetched.value
 
-const content = ref<Rec[]>([]); const contentFallback = ref(false)
-const collab = ref<Rec[]>([]); const collabFallback = ref(false)
-const session = ref<Rec[]>([]); const sessionFallback = ref(false)
-const semantic = ref<Rec[]>([])
+const cart = useCart()
+const inCart = computed(() => cart.items.value.find(i => i.product_id === data.product_id))
 const platform = ref<ProductPlatform | null>(null)
-const inCart = ref(false)
-const P = () => ({ product_id: data.product_id, price: data.price, category_id: data.category_id })
+
+// Every recommendation section is independent: if one module fails, the others are still shown.
+const sections = reactive([
+  { title: 'Recommended Products', source: 'content', path: `/recommendations/content/${data.product_id}`, items: [] as Rec[], fallback: false, note: '' },
+  { title: 'Customers Also Viewed', source: 'collaborative', path: `/recommendations/collaborative/${data.product_id}`, items: [] as Rec[], fallback: false, note: '' },
+  { title: 'Based on your session', source: 'session', path: '', items: [] as Rec[], fallback: false, note: 'not enough signals in the session' },
+  { title: 'Semantically similar', source: 'semantic', path: `/recommendations/semantic/${data.product_id}`, items: [] as Rec[], fallback: false, note: '' },
+])
+
+// Where the visitor came from, for the product_view event.
+function viewSource() {
+  const from: string = history.state?.back || ''
+  if (from.startsWith('/category')) return 'category_page'
+  if (from.startsWith('/shop')) return 'shop'
+  if (from.startsWith('/search')) return 'search_page'
+  return 'product_page'
+}
 
 onMounted(async () => {
-  const src = (history.state?.back || "").startsWith("/category") ? "category_page"
-            : (history.state?.back || "").startsWith("/shop") ? "shop"
-            : (history.state?.back || "").startsWith("/search") ? "search_page" : "product_page"
-  await trackProductView(P(), src)
-  const cat = (await useCatalog()).value
-  // each section is independent: if one module fails, the others are still shown
-  await Promise.all([loadContent(cat), loadCollab(cat), loadSession(cat), loadSemantic(cat), loadPlatform()])
+  await trackProductView(eventProduct(toCartItem(data)), viewSource())
+  const catalog = (await useCatalog()).value
+  sections[2]!.path = `/recommendations/session/${getOrGenerateSessionId()}`
+  await Promise.all([
+    ...sections.map(async (s) => {
+      const r = await mlGet<RecList>(`${s.path}?limit=5`)
+      if (!r) return
+      s.items = enrich(r.recommendations, catalog)
+      s.fallback = !!r.fallback
+    }),
+    mlGet<ProductPlatform>(`/platform/product/${data.product_id}`).then((p) => { platform.value = p }),
+  ])
 })
-
-async function loadContent(cat: Record<number, Product>) {
-  const c = await mlGet<RecList>(`/recommendations/content/${data.product_id}?limit=5`)
-  if (c) { content.value = enrich(c.recommendations, cat); contentFallback.value = !!c.fallback }
-}
-async function loadCollab(cat: Record<number, Product>) {
-  const cf = await mlGet<RecList>(`/recommendations/collaborative/${data.product_id}?limit=5`)
-  if (cf) { collab.value = enrich(cf.recommendations, cat); collabFallback.value = !!cf.fallback }
-}
-async function loadSession(cat: Record<number, Product>) {
-  const se = await mlGet<RecList>(`/recommendations/session/${getOrGenerateSessionId()}?limit=5`)
-  if (se) { session.value = enrich(se.recommendations, cat); sessionFallback.value = !!se.fallback }
-}
-async function loadSemantic(cat: Record<number, Product>) {
-  const sm = await mlGet<RecList>(`/recommendations/semantic/${data.product_id}?limit=5`)
-  if (sm) semantic.value = enrich(sm.recommendations, cat)
-}
-async function loadPlatform() {
-  platform.value = await mlGet<ProductPlatform>(`/platform/product/${data.product_id}`)
-}
 
 useSeoMeta({
   title: data.seo?.title,
@@ -101,21 +103,5 @@ useSeoMeta({
   ogUrl: 'http://localhost:3000/product/' + slug,
   twitterCard: 'summary_large_image',
 })
-useHead({ htmlAttrs: { lang: 'en' }, meta: [{ name: 'keywords', content: (data.seo?.key_words || []).join(", ") }] })
-
-async function addToCart() {
-  if (await addToShoppingCartEvent(P())) {
-    inCart.value = true
-    toast.add({ title: 'Added to shopping cart', description: data.name, icon: 'i-lucide-shopping-cart' })
-  }
-}
-async function removeFromCart() {
-  if (await removeFromCartEvent(P())) { inCart.value = false; toast.add({ title: 'Removed from cart', description: data.name }) }
-}
-async function buy() {
-  if (await buyProductEvent(P())) {
-    inCart.value = false
-    toast.add({ title: 'Purchase recorded', description: data.name, icon: 'i-lucide-check' })
-  }
-}
+useHead({ htmlAttrs: { lang: 'en' }, meta: [{ name: 'keywords', content: (data.seo?.key_words || []).join(', ') }] })
 </script>
