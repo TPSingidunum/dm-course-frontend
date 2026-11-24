@@ -2,23 +2,41 @@
 <template>
   <AdminPage title="Customer segments">
     <template #actions>
-      <UInput v-model.number="k" type="number" class="w-20" aria-label="Number of clusters" />
+      <UInput v-model.number="k" type="number" :min="2" :max="10" class="w-20" aria-label="Number of clusters" />
       <UButton :loading="busy" data-testid="train-segments" @click="train">Train (k={{ k }})</UButton>
     </template>
 
     <MlUnavailable v-if="down" :retry="load" />
     <UAlert
-      v-else-if="!meta" color="info" variant="subtle" title="Model not trained"
+      v-else-if="!meta" color="info" variant="subtle" icon="i-lucide-info" title="Model not trained"
       description="Click “Train” to train the segmentation model." data-testid="untrained" />
     <UAlert v-if="error" color="error" variant="subtle" :title="error" />
 
     <template v-if="meta">
-      <p class="text-sm">k={{ meta.k }} · silhouette={{ meta.silhouette }} · customers={{ meta.n_customers }} · reference {{ meta.reference }}</p>
-      <AdminTable :data="meta.segments" :columns="segmentCols" data-testid="segments-table" />
-      <template v-if="meta.comparison">
-        <h2 class="text-xl font-bold">Manual RFM vs K-Means (ARI = {{ meta.comparison.ari }})</h2>
-        <AdminTable :data="dominant" :columns="dominantCols" />
-      </template>
+      <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatTile label="Clusters (k)" icon="i-lucide-boxes" :value="meta.k" />
+        <StatTile label="Silhouette" icon="i-lucide-scan-search" :value="meta.silhouette" hint="closer to 1 is better" />
+        <StatTile label="Customers" icon="i-lucide-users" :value="formatCell('count', meta.n_customers)" />
+        <StatTile label="Reference date" icon="i-lucide-calendar" :value="meta.reference" />
+      </div>
+
+      <AdminSection title="Segment profiles" description="Average behaviour of each cluster.">
+        <AdminTable :data="meta.segments" :columns="segmentCols" data-testid="segments-table">
+          <template #share-cell="{ row }"><MeterBar :value="Number(row.original.share)" /></template>
+          <template #segment-cell="{ row }"><span class="font-medium text-highlighted">{{ row.original.segment }}</span></template>
+        </AdminTable>
+      </AdminSection>
+
+      <AdminSection
+        v-if="meta.comparison" title="Manual RFM vs K-Means"
+        description="Which cluster dominates each manual RFM bucket.">
+        <template #actions>
+          <UBadge variant="subtle">ARI = {{ meta.comparison.ari }}</UBadge>
+        </template>
+        <AdminTable :data="dominant" :columns="dominantCols">
+          <template #share-cell="{ row }"><MeterBar :value="Number(row.original.share)" /></template>
+        </AdminTable>
+      </AdminSection>
     </template>
   </AdminPage>
 </template>

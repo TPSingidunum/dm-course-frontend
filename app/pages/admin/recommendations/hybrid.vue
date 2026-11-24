@@ -3,9 +3,17 @@
   <AdminPage title="Hybrid recommender" back>
     <MlUnavailable v-if="!report && loaded" :retry="load" />
     <template v-if="report">
-      <p class="text-sm">split {{ report.split_time }} · test users {{ report.n_test_users }} · K={{ report.k }}</p>
-      <AdminTable :data="report.comparison" :columns="cols" data-testid="hybrid-table" />
-      <p class="text-xs text-muted">The merge weights (0.2/0.3/0.3/0.2) are hand-picked heuristics, not learned.</p>
+      <div class="grid grid-cols-1 gap-4 min-[480px]:grid-cols-3">
+        <StatTile label="Split time" icon="i-lucide-scissors" :value="report.split_time" hint="train before, test after" />
+        <StatTile label="Test users" icon="i-lucide-users" :value="formatCell('count', report.n_test_users)" />
+        <StatTile label="Top-K" icon="i-lucide-list-ordered" :value="`K = ${report.k}`" />
+      </div>
+      <AdminSection title="Method comparison" description="Hybrid vs each individual source, evaluated per user.">
+        <AdminTable :data="report.comparison" :columns="cols" data-testid="hybrid-table" />
+      </AdminSection>
+      <UAlert
+        color="neutral" variant="subtle" icon="i-lucide-info"
+        description="The merge weights (0.2/0.3/0.3/0.2) are hand-picked heuristics, not learned." />
     </template>
   </AdminPage>
 </template>
