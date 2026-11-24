@@ -1,0 +1,113 @@
+<!-- Shared create/update form for products (including SEO fields and SEO generation). -->
+<template>
+  <UCard>
+    <template #header>
+      <h2 class="font-semibold">{{ title }}</h2>
+    </template>
+    <UForm ref="form" :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
+      <UFormField label="Name" name="name">
+        <UInput v-model="state.name" class="w-full" />
+      </UFormField>
+      <UFormField label="Slug" name="slug">
+        <UInput v-model="state.slug" class="w-full" />
+      </UFormField>
+      <UFormField label="Category" name="category_id">
+        <USelect v-model="state.category_id" placeholder="Select a category" :items="categories" class="w-full" />
+      </UFormField>
+      <UFormField label="Description" name="description">
+        <UTextarea v-model="state.description" :rows="4" class="w-full" />
+      </UFormField>
+      <UFormField label="Image URL" name="img_url">
+        <UInput v-model="state.img_url" class="w-full" />
+      </UFormField>
+
+      <USeparator label="SEO" />
+
+      <UFormField label="SEO title" name="seo_title">
+        <UInput v-model="state.seo_title" class="w-full" />
+      </UFormField>
+      <UFormField label="SEO description" name="seo_description">
+        <UInput v-model="state.seo_description" class="w-full" />
+      </UFormField>
+      <UFormField label="SEO keywords" name="seo_keywords">
+        <UInputTags v-model="state.seo_keywords" placeholder="Enter tags..." class="w-full" />
+      </UFormField>
+
+      <div class="flex flex-wrap justify-end gap-3">
+        <UButton color="neutral" variant="outline" :loading="generating" @click="generateSeo">Generate SEO</UButton>
+        <UButton type="submit" :loading="busy">{{ submitLabel }}</UButton>
+      </div>
+    </UForm>
+  </UCard>
+</template>
+
+<script lang="ts" setup>
+import type { FormSubmitEvent, SelectItem } from '@nuxt/ui'
+import z from 'zod'
+import type { Category } from '~/types/Category'
+import type { Product } from '~/types/Product'
+import type { SeoResponse } from '~/types/Ml'
+
+const props = defineProps<{ title: string, submitLabel: string, url: string, initial?: Product | null }>()
+
+const toast = useToast()
+const { data: categoryData } = await useFetch<Category[]>('/api/category', { default: () => [] })
+const categories = computed<SelectItem[]>(() => categoryData.value.map(c => ({ label: c.name, value: c.category_id })))
+
+const schema = z.object({
+  name: z.string('Name is required').min(3, 'Must be at least 3 characters').max(64, 'Must be at most 64 characters'),
+  slug: z.string('Slug is required').regex(/^[a-z0-9-]{3,128}$/, 'Your slug has to contain only lowercase letters, numbers and a - symbol'),
+  category_id: z.int('Category is required'),
+  description: z.string('Description is required'),
+  img_url: z.httpUrl('Image Link is required'),
+  seo_id: z.int().optional(),
+  seo_title: z.string('Title is required').min(3, 'Must be at least 3 characters').max(60, 'Must be at most 60 characters'),
+  seo_description: z.string('Description is required').max(155, 'Must be at most 155 characters'),
+  seo_keywords: z.array(z.string()),
+})
+type Schema = z.output<typeof schema>
+
+const form = useTemplateRef('form')
+const busy = ref(false)
+const generating = ref(false)
+const p = props.initial
+const state = reactive<Partial<Schema>>({
+  name: p?.name,
+  slug: p?.slug,
+  category_id: p?.category_id,
+  description: p?.description,
+  img_url: p?.img_url,
+  seo_id: p?.seo_id,
+  seo_title: p?.seo?.title,
+  seo_description: p?.seo?.description,
+  seo_keywords: p?.seo?.key_words ?? [],
+})
+
+async function onSubmit(event: FormSubmitEvent<Schema>) {
+  busy.value = true
+  try {
+    if (await $fetch(props.url, { method: 'POST', body: event.data })) await navigateTo('/admin/product')
+  } catch (e) {
+    showServerError(form.value, e)
+  } finally {
+    busy.value = false
+  }
+}
+
+async function generateSeo() {
+  generating.value = true
+  try {
+    const r = await $fetch<SeoResponse>('/ml/seo/generate/product', {
+      method: 'POST',
+      body: { title: state.name, description: state.description },
+    })
+    state.seo_title = r.title
+    state.seo_description = r.description
+    state.seo_keywords = r.keywords
+  } catch {
+    toast.add({ title: 'Could not generate SEO', description: 'The ML API is unavailable.', color: 'error' })
+  } finally {
+    generating.value = false
+  }
+}
+</script>

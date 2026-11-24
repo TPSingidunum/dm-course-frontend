@@ -8,6 +8,8 @@ export interface Product {
   price: number | null
   seo_id?: number
   seo?: Seo | null
+  created_at?: string | Date
+  updated_at?: string | Date
 }
 
 export interface Seo {

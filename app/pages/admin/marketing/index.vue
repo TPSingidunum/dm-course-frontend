@@ -1,24 +1,41 @@
-<!-- Day 12: marketing dashboard — platform modules (class, availability, fallback) + demo user profile. -->
+<!-- Marketing dashboard — platform modules (class, availability, fallback) + demo user profile. -->
 <template>
-  <div class="min-w-0 p-4 sm:p-6">
-    <h1 class="text-2xl font-bold mb-4">Marketing platform</h1>
-    <MlUnavailable v-if="!mods && loaded" />
-    <template v-if="mods">
-      <p class="text-sm mb-2" data-testid="module-summary">modules {{ mods.modules.length }} · available {{ mods.modules.filter(m => m.available).length }}</p>
-      <UTable :data="mods.modules" :columns="cols" class="mb-6" data-testid="modules-table" />
+  <AdminPage title="Marketing platform">
+    <MlUnavailable v-if="!modules && loaded" />
+    <template v-if="modules">
+      <p class="text-sm" data-testid="module-summary">
+        modules {{ modules.modules.length }} · available {{ modules.modules.filter(m => m.available).length }}
+      </p>
+      <AdminTable :data="modules.modules" :columns="cols" data-testid="modules-table" />
     </template>
+
+    <h2 class="text-xl font-bold">User profile</h2>
     <div class="flex flex-wrap items-center gap-2">
-      <UInput v-model.number="uid" type="number" class="w-32" /><UButton @click="loadProfile">Profile</UButton>
+      <UInput v-model.number="userId" type="number" class="w-32" aria-label="User id" />
+      <UButton @click="loadProfile">Profile</UButton>
     </div>
-    <pre v-if="profile" class="text-xs bg-elevated p-3 rounded" data-testid="profile">{{ JSON.stringify(profile, null, 2) }}</pre>
-  </div>
+    <pre v-if="profile" class="overflow-x-auto rounded-lg bg-elevated p-3 text-xs" data-testid="profile">{{ JSON.stringify(profile, null, 2) }}</pre>
+  </AdminPage>
 </template>
+
 <script lang="ts" setup>
 import type { PlatformModules } from '~/types/Ml'
 
 definePageMeta({ layout: 'admin' })
-const mods = ref<PlatformModules | null>(null); const loaded = ref(false); const uid = ref(DEMO_USER_ID); const profile = ref<unknown>(null)
-const cols = ['day', 'id', 'name', 'class', 'available', 'endpoint', 'fallback'].map(x => ({ accessorKey: x, header: x }))
-async function loadProfile() { profile.value = await mlGet(`/platform/profile/${uid.value}`) }
-onMounted(async () => { mods.value = await mlGet<PlatformModules>('/platform/modules'); loaded.value = true; await loadProfile() })
+
+const modules = ref<PlatformModules | null>(null)
+const loaded = ref(false)
+const userId = ref(DEMO_USER_ID)
+const profile = ref<unknown>(null)
+const cols = columnsFor(['day', 'id', 'name', 'class', 'available', 'endpoint', 'fallback'])
+
+async function loadProfile() {
+  profile.value = await mlGet(`/platform/profile/${userId.value}`)
+}
+
+onMounted(async () => {
+  modules.value = await mlGet<PlatformModules>('/platform/modules')
+  loaded.value = true
+  await loadProfile()
+})
 </script>
