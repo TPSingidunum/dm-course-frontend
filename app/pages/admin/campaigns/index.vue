@@ -32,7 +32,10 @@
         <StatTile label="Shown" icon="i-lucide-eye" :value="formatCell('count', audience.returned)" />
       </div>
       <AdminTable :data="audienceRows" :columns="audienceCols">
-        <template #probability-cell="{ row }"><MeterBar :value="Number(row.original.probability)" /></template>
+        <template #probability-cell="{ row }">
+          <MeterBar v-if="row.original.probability != null" :value="Number(row.original.probability)" />
+          <span v-else>—</span>
+        </template>
         <template #why-cell="{ row }">
           <div class="flex flex-wrap gap-1">
             <UBadge v-for="r in row.original.reasons" :key="r" variant="subtle" color="neutral">{{ r }}</UBadge>
@@ -46,7 +49,7 @@
       <div class="grid grid-cols-1 gap-4 min-[480px]:grid-cols-3">
         <StatTile
           label="Expected conversions lift" icon="i-lucide-trending-up"
-          :value="`${(comparison.metrics.lift_expected_conversions ?? 0) > 0 ? '+' : ''}${comparison.metrics.lift_expected_conversions}`" hint="ML vs rule" />
+          :value="comparison.metrics.lift_expected_conversions != null ? `${comparison.metrics.lift_expected_conversions}×` : '—'" hint="ML vs rule" />
         <StatTile label="Overlap" icon="i-lucide-venn" :value="formatCell('count', comparison.metrics.overlap)" hint="customers in both" />
         <StatTile label="Jaccard" icon="i-lucide-percent" :value="formatCell('jaccard', comparison.metrics.jaccard)" />
       </div>

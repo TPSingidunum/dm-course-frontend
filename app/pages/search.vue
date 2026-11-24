@@ -47,4 +47,8 @@ async function search() {
 }
 
 onMounted(() => { if (q.value) search() })
+watch(() => route.query.q, (v) => {
+  q.value = String(v || '')
+  if (q.value.trim()) search()
+})
 </script>
