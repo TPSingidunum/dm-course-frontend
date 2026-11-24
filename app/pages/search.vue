@@ -13,7 +13,8 @@
     </div>
     <UAlert v-if="error" color="error" variant="subtle" :title="error" />
 
-    <ProductGrid>
+    <EmptyState v-if="res && !results.length && !error" icon="i-lucide-search-x" title="No results" description="Try describing the product in different words." />
+    <ProductGrid v-else>
       <ProductCard
         v-for="(r, i) in results" :key="r.product_id" :product="r" :meta="`score ${r.score}`"
         @open="trackRecommendationClick(r.product_id, 'semantic', i + 1)" />

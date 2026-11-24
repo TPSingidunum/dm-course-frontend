@@ -1,9 +1,12 @@
 <template>
   <StorePage :title="data.category.name" back>
-    <ProductGrid>
+    <EmptyState v-if="!data.products.length" icon="i-lucide-package-open" title="No products in this category" description="Check back later or browse the whole shop.">
+      <UButton to="/shop" variant="outline">Browse the shop</UButton>
+    </EmptyState>
+    <ProductGrid v-else>
       <ProductCard
         v-for="product in data.products" :key="product.product_id" :product="product" cart
-        @add="addToCart(product)" />
+        @add="cart.add(product, 'category_page')" />
     </ProductGrid>
   </StorePage>
 </template>
@@ -12,7 +15,7 @@
 import type { Category } from '~/types/Category'
 import type { Product } from '~/types/Product'
 
-const toast = useToast()
+const cart = useCart()
 const slug = useRoute().params.slug
 
 const { data: fetched, error } = await useFetch<{ category: Category, products: Product[] }>(`/api/category/${slug}`)
@@ -25,11 +28,4 @@ if (!data) {
 }
 
 onMounted(() => trackCategoryView(data.category.category_id))
-
-async function addToCart(p: Product) {
-  // the user "saw" the product on the category page -> product_view + add_to_cart
-  const ev = { product_id: p.product_id, price: p.price, category_id: p.category_id }
-  await trackProductView(ev, 'category_page')
-  if (await addToShoppingCartEvent(ev, 1, 'category_page')) toast.add({ title: 'Added to shopping cart', description: p.name })
-}
 </script>

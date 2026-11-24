@@ -1,7 +1,7 @@
 <!-- Campaigns — recommended audience (rule vs ML) with reasons + targeting comparison. -->
 <template>
   <AdminPage title="Campaigns">
-    <MlUnavailable v-if="down" />
+    <MlUnavailable v-if="down" :retry="loadCampaigns" />
     <AdminTable v-else :data="campaigns" :columns="campaignCols" data-testid="campaigns-table" />
 
     <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
@@ -68,9 +68,12 @@ async function loadAudience() {
   ])
 }
 
-onMounted(async () => {
+async function loadCampaigns() {
   const list = await mlGet<Campaign[]>('/campaigns')
-  if (!list) { down.value = true; return }
+  down.value = !list
+  if (!list) return
   campaigns.value = list.map(c => ({ ...c, target_segments: (c.target_segments || []).join(', '), eligible_buckets: (c.eligible_buckets || []).join(', ') }))
-})
+}
+
+onMounted(loadCampaigns)
 </script>

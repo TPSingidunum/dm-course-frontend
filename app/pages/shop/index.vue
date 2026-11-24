@@ -17,11 +17,12 @@
 
     <DbAlert v-if="error" what="Products" />
 
-    <ProductGrid>
+    <EmptyState v-if="!products.length && !error" icon="i-lucide-package-open" title="No products yet" description="Products you create in the admin area will show up here." />
+    <ProductGrid v-else>
       <ProductCard
         v-for="product in ordered" :key="product.product_id" :product="product" cart
         :badge="isRecommended(product) ? 'For you' : 'Sale'" :badge-color="isRecommended(product) ? 'primary' : 'error'"
-        @add="addToCart(product)" />
+        @add="cart.add(product, 'shop')" />
     </ProductGrid>
   </StorePage>
 </template>
@@ -30,7 +31,7 @@
 import type { Product } from '~/types/Product'
 import type { RecList } from '~/types/Ml'
 
-const toast = useToast()
+const cart = useCart()
 const { data: products, error } = await useFetch<Product[]>('/api/shop', { default: () => [] })
 
 const mode = ref<'default' | 'personalized'>('default')
@@ -69,10 +70,4 @@ const ordered = computed(() => {
   return [...recommended, ...products.value.filter(p => !rank.has(p.product_id))]
 })
 const moved = computed(() => ordered.value.filter((p, i) => products.value[i]?.product_id !== p.product_id).length)
-
-async function addToCart(p: Product) {
-  const ev = { product_id: p.product_id, price: p.price, category_id: p.category_id }
-  await trackProductView(ev, 'shop')
-  if (await addToShoppingCartEvent(ev, 1, 'shop')) toast.add({ title: 'Added to shopping cart', description: p.name })
-}
 </script>

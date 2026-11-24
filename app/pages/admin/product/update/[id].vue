@@ -1,5 +1,5 @@
 <template>
-  <AdminPage title="Update Product" back narrow>
+  <AdminPage title="Update Product" back narrow :crumbs="[{ label: 'Dashboard', to: '/admin' }, { label: 'Products', to: '/admin/product' }, { label: 'Update' }]">
     <DbAlert v-if="error" what="Product" />
     <ProductForm v-else :title="`Updating product ${id}`" submit-label="Update" :url="`/api/product/update/${id}`" :initial="data" />
   </AdminPage>

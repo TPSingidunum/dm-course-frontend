@@ -1,10 +1,28 @@
 <template>
   <StorePage back>
-    <div class="grid gap-8 lg:grid-cols-3">
-      <div class="min-w-0 space-y-6 lg:col-span-2">
-        <div class="aspect-[4/3] w-full overflow-hidden rounded-lg bg-elevated">
-          <NuxtImg :src="data.img_url" :alt="data.name" class="size-full object-contain" />
+    <div class="grid gap-x-8 gap-y-6 lg:grid-cols-3">
+      <div class="aspect-[4/3] w-full overflow-hidden rounded-lg bg-elevated lg:col-span-2">
+        <NuxtImg :src="data.img_url" :alt="data.name" class="size-full object-contain" />
+      </div>
+
+      <!-- Buy box sits right under the image on mobile and in the right column on desktop. -->
+      <aside class="min-w-0 lg:col-start-3 lg:row-span-2 lg:row-start-1">
+        <div class="space-y-4 rounded-lg border border-default p-5 lg:sticky lg:top-20">
+          <UBadge color="error">Sale</UBadge>
+          <h1 class="text-2xl font-bold" data-testid="product-name">{{ data.name }}</h1>
+          <p class="text-2xl font-bold" data-testid="product-price">{{ formatPrice(data.price) }}</p>
+          <div class="flex flex-col gap-2">
+            <UButton block @click="cart.add(data)">Add to cart</UButton>
+            <UButton :to="`/buy/${data.slug}`" block variant="outline">Buy now</UButton>
+            <template v-if="inCart">
+              <UButton to="/checkout" block color="neutral" variant="soft">Go to checkout ({{ inCart.quantity }} in cart)</UButton>
+              <UButton block color="neutral" variant="ghost" @click="cart.remove(data.product_id)">Remove from cart</UButton>
+            </template>
+          </div>
         </div>
+      </aside>
+
+      <div class="min-w-0 space-y-6 lg:col-span-2">
         <p class="text-muted">{{ data.description }}</p>
 
         <!-- Platform section (AI description with fallback + module_class) -->
@@ -16,19 +34,6 @@
           <p>{{ platform.ai_description?.content }}</p>
         </UCard>
       </div>
-
-      <aside class="min-w-0">
-        <div class="space-y-4 rounded-lg border border-default p-5 lg:sticky lg:top-20">
-          <UBadge color="error">Sale</UBadge>
-          <h1 class="text-2xl font-bold" data-testid="product-name">{{ data.name }}</h1>
-          <p class="text-2xl font-bold" data-testid="product-price">{{ formatPrice(data.price) }}</p>
-          <div class="flex flex-col gap-2">
-            <UButton block @click="addToCart">Add to cart</UButton>
-            <UButton v-if="inCart" block variant="ghost" @click="removeFromCart">Remove from cart</UButton>
-            <UButton block variant="outline" @click="buy">Buy</UButton>
-          </div>
-        </div>
-      </aside>
     </div>
 
     <RecSection
@@ -42,7 +47,6 @@ import type { Product, Rec } from '~/types/Product'
 import type { ProductPlatform, RecList } from '~/types/Ml'
 
 const route = useRoute()
-const toast = useToast()
 const slug = route.params.slug
 
 const { data: fetched, error } = await useFetch<Product>(`/api/product/${slug}`)
@@ -54,8 +58,8 @@ if (!fetched.value) {
 }
 const data: Product = fetched.value
 
-const eventProduct = { product_id: data.product_id, price: data.price, category_id: data.category_id }
-const inCart = ref(false)
+const cart = useCart()
+const inCart = computed(() => cart.items.value.find(i => i.product_id === data.product_id))
 const platform = ref<ProductPlatform | null>(null)
 
 // Every recommendation section is independent: if one module fails, the others are still shown.
@@ -76,7 +80,7 @@ function viewSource() {
 }
 
 onMounted(async () => {
-  await trackProductView(eventProduct, viewSource())
+  await trackProductView(eventProduct(toCartItem(data)), viewSource())
   const catalog = (await useCatalog()).value
   sections[2]!.path = `/recommendations/session/${getOrGenerateSessionId()}`
   await Promise.all([
@@ -100,23 +104,4 @@ useSeoMeta({
   twitterCard: 'summary_large_image',
 })
 useHead({ htmlAttrs: { lang: 'en' }, meta: [{ name: 'keywords', content: (data.seo?.key_words || []).join(', ') }] })
-
-async function addToCart() {
-  if (await addToShoppingCartEvent(eventProduct)) {
-    inCart.value = true
-    toast.add({ title: 'Added to shopping cart', description: data.name, icon: 'i-lucide-shopping-cart' })
-  }
-}
-async function removeFromCart() {
-  if (await removeFromCartEvent(eventProduct)) {
-    inCart.value = false
-    toast.add({ title: 'Removed from cart', description: data.name })
-  }
-}
-async function buy() {
-  if (await buyProductEvent(eventProduct)) {
-    inCart.value = false
-    toast.add({ title: 'Purchase recorded', description: data.name, icon: 'i-lucide-check' })
-  }
-}
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <AdminPage title="Create Category" back narrow>
+  <AdminPage title="Create Category" back narrow :crumbs="[{ label: 'Dashboard', to: '/admin' }, { label: 'Categories', to: '/admin/category' }, { label: 'Create' }]">
     <CategoryForm title="New category" submit-label="Create" url="/api/category/create" />
   </AdminPage>
 </template>

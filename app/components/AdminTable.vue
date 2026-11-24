@@ -3,10 +3,13 @@
   <div class="space-y-3">
     <UInput v-if="searchable" v-model="filter" icon="i-lucide-search" placeholder="Filter..." class="w-full sm:max-w-xs" />
     <UTable
-      v-model:global-filter="filter" v-model:pagination="pagination" :data="data" :columns="columns"
+      v-model:global-filter="filter" v-model:pagination="pagination" v-model:expanded="expanded" :data="data" :columns="columns"
       :pagination-options="paginated ? { getPaginationRowModel: getPaginationRowModel() } : undefined"
       class="rounded-lg border border-default"
-      :ui="{ th: 'whitespace-nowrap', td: 'whitespace-nowrap' }">
+      :ui="{ th: 'whitespace-nowrap', td: 'whitespace-nowrap', tr: 'hover:bg-elevated/50 data-[expanded=true]:bg-elevated/50' }">
+      <template #empty>
+        <div class="py-6 text-sm text-muted">{{ emptyText }}</div>
+      </template>
       <template v-for="(_, name) in $slots" #[name]="scope" :key="name">
         <slot :name="name" v-bind="scope" />
       </template>
@@ -29,9 +32,11 @@ const props = withDefaults(defineProps<{
   searchable?: boolean
   paginated?: boolean
   pageSize?: number
-}>(), { pageSize: 10 })
+  emptyText?: string
+}>(), { pageSize: 10, emptyText: 'Nothing here yet.' })
 
 const filter = ref('')
+const expanded = ref({})
 const pagination = ref({ pageIndex: 0, pageSize: props.pageSize })
 const page = computed({
   get: () => pagination.value.pageIndex + 1,

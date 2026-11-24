@@ -5,7 +5,7 @@
       <UButton to="/admin/recommendations/hybrid" variant="outline">Hybrid evaluation</UButton>
     </template>
 
-    <MlUnavailable v-if="!report && loaded" />
+    <MlUnavailable v-if="!report && loaded" :retry="load" />
     <template v-if="report">
       <p class="text-sm" data-testid="eval-header">
         split {{ report.split_time }} · test cases {{ report.n_test_cases }} · test sessions {{ report.n_test_sessions }} ·
@@ -48,12 +48,14 @@ const evalCols = columnsFor(['method', 'precision_at_k', 'recall_at_k', 'hit_rat
 const ctrCols = columnsFor(['group', 'impressions', 'clicks', 'ctr'])
 const comparisonCols = columnsFor(['algorithm', 'impressions', 'clicks', 'ctr'])
 
-onMounted(async () => {
+async function load() {
   [report.value, ctr.value, comparison.value] = await Promise.all([
     mlGet<EvalReport>('/analytics/recommendations'),
     mlGet<CtrReport>('/analytics/recommendations/ctr'),
     mlGet<SessionComparison>('/analytics/recommendations/session-comparison'),
   ])
   loaded.value = true
-})
+}
+
+onMounted(load)
 </script>

@@ -1,7 +1,7 @@
 <!-- Marketing dashboard — platform modules (class, availability, fallback) + demo user profile. -->
 <template>
   <AdminPage title="Marketing platform">
-    <MlUnavailable v-if="!modules && loaded" />
+    <MlUnavailable v-if="!modules && loaded" :retry="init" />
     <template v-if="modules">
       <p class="text-sm" data-testid="module-summary">
         modules {{ modules.modules.length }} · available {{ modules.modules.filter(m => m.available).length }}
@@ -33,9 +33,11 @@ async function loadProfile() {
   profile.value = await mlGet(`/platform/profile/${userId.value}`)
 }
 
-onMounted(async () => {
+async function init() {
   modules.value = await mlGet<PlatformModules>('/platform/modules')
   loaded.value = true
   await loadProfile()
-})
+}
+
+onMounted(init)
 </script>

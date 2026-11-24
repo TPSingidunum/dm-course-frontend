@@ -6,7 +6,7 @@
       <UButton :loading="busy" data-testid="train-conversion" @click="train">Train</UButton>
     </template>
 
-    <MlUnavailable v-if="down" />
+    <MlUnavailable v-if="down" :retry="load" />
     <UAlert
       v-else-if="!status" color="info" variant="subtle" title="Model not trained"
       description="Click “Train” to train the conversion model." data-testid="untrained" />

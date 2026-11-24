@@ -2,6 +2,17 @@
   <div class="flex min-h-screen flex-col">
     <UHeader title="DM" to="/">
       <UNavigationMenu :items="items" />
+
+      <template #right>
+        <form class="hidden lg:block" @submit.prevent="search">
+          <UInput v-model="query" icon="i-lucide-search" placeholder="Search products…" class="w-56" aria-label="Search products" />
+        </form>
+        <UColorModeButton />
+        <UChip :text="cart.count.value" :show="cart.count.value > 0" size="3xl" color="primary">
+          <UButton to="/checkout" icon="i-lucide-shopping-cart" color="neutral" variant="ghost" aria-label="Cart" />
+        </UChip>
+      </template>
+
       <template #body>
         <UNavigationMenu :items="items" orientation="vertical" class="-mx-2.5" />
       </template>
@@ -21,7 +32,14 @@
 import type { NavigationMenuItem } from '@nuxt/ui'
 
 const route = useRoute()
+const cart = useCart()
+const query = ref('')
 getOrGenerateSessionId()
+onMounted(cart.load)
+
+function search() {
+  if (query.value.trim()) navigateTo({ path: '/search', query: { q: query.value.trim() } })
+}
 
 const items = computed<NavigationMenuItem[]>(() => [
   { label: 'Home', to: '/', active: route.path === '/' },

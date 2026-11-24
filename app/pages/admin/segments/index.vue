@@ -6,7 +6,7 @@
       <UButton :loading="busy" data-testid="train-segments" @click="train">Train (k={{ k }})</UButton>
     </template>
 
-    <MlUnavailable v-if="down" />
+    <MlUnavailable v-if="down" :retry="load" />
     <UAlert
       v-else-if="!meta" color="info" variant="subtle" title="Model not trained"
       description="Click “Train” to train the segmentation model." data-testid="untrained" />
