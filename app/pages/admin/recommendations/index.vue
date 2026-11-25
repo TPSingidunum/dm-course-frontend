@@ -2,7 +2,7 @@
 <template>
   <AdminPage title="Recommendations">
     <template #actions>
-      <UButton to="/admin/recommendations/hybrid" variant="outline" trailing-icon="i-lucide-arrow-right">Hybrid evaluation</UButton>
+      <UButton to="/admin/recommendations/hybrid" color="neutral" variant="outline" trailing-icon="i-lucide-arrow-right">Hybrid evaluation</UButton>
     </template>
 
     <MlUnavailable v-if="!report && loaded" :retry="load" />

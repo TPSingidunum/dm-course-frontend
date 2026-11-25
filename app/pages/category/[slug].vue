@@ -1,7 +1,7 @@
 <template>
   <StorePage :title="data.category.name" back>
     <EmptyState v-if="!data.products.length" icon="i-lucide-package-open" title="No products in this category" description="Check back later or browse the whole shop.">
-      <UButton to="/shop" variant="outline">Browse the shop</UButton>
+      <UButton to="/shop" color="neutral" variant="outline">Browse the shop</UButton>
     </EmptyState>
     <ProductGrid v-else>
       <ProductCard

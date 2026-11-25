@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded-lg border border-default p-4">
+  <div class="rounded-lg bg-elevated/50 p-4">
     <div class="flex items-center gap-2 text-sm text-muted">
       <UIcon v-if="icon" :name="icon" class="size-4" />{{ label }}
     </div>

@@ -13,7 +13,7 @@
     <template v-if="result">
       <div class="grid gap-4 lg:grid-cols-2" data-testid="seo-result">
         <AdminSection title="Search result preview">
-          <div class="space-y-1 rounded-lg border border-default p-4">
+          <div class="space-y-1 rounded-lg bg-elevated/50 p-4">
             <p class="truncate text-sm text-muted">yourstore.com › product</p>
             <p class="text-lg font-medium text-primary">{{ result.seo_title }}</p>
             <p class="text-sm">{{ result.seo_description }}</p>
@@ -21,7 +21,7 @@
         </AdminSection>
 
         <AdminSection title="Quality checks">
-          <div class="space-y-4 rounded-lg border border-default p-4">
+          <div class="space-y-4 rounded-lg bg-elevated/50 p-4">
             <div v-for="m in meters" :key="m.label" class="space-y-1">
               <div class="flex justify-between text-sm"><span>{{ m.label }}</span><span class="tabular-nums text-muted">{{ m.length }}/{{ m.max }}</span></div>
               <UProgress :model-value="Math.min(m.length / m.max, 1) * 100" :color="m.length > m.max ? 'error' : 'success'" />

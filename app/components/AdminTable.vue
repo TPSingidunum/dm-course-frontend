@@ -5,7 +5,6 @@
     <UTable
       v-model:global-filter="filter" v-model:pagination="pagination" v-model:expanded="expanded" :data="data" :columns="columns"
       :pagination-options="paginated ? { getPaginationRowModel: getPaginationRowModel() } : undefined"
-      class="rounded-lg border border-default"
       :ui="{ th: 'whitespace-nowrap', td: 'whitespace-nowrap', tr: 'hover:bg-elevated/50 data-[expanded=true]:bg-elevated/50' }">
       <template #empty>
         <div class="py-6 text-sm text-muted">{{ emptyText }}</div>

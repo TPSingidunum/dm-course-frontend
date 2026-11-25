@@ -11,8 +11,8 @@
         <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <USelect v-model="campaignId" :items="options" class="w-full sm:max-w-xs" aria-label="Campaign" />
           <div class="flex items-center gap-2">
-            <UButton :variant="mode === 'ml' ? 'solid' : 'outline'" @click="setMode('ml')">ML</UButton>
-            <UButton :variant="mode === 'rule' ? 'solid' : 'outline'" @click="setMode('rule')">Rule</UButton>
+            <UButton :color="mode === 'ml' ? 'primary' : 'neutral'" :variant="mode === 'ml' ? 'solid' : 'outline'" @click="setMode('ml')">ML</UButton>
+            <UButton :color="mode === 'rule' ? 'primary' : 'neutral'" :variant="mode === 'rule' ? 'solid' : 'outline'" @click="setMode('rule')">Rule</UButton>
           </div>
           <UButton icon="i-lucide-users" data-testid="load-audience" @click="loadAudience">Show audience</UButton>
         </div>

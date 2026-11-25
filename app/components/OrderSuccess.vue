@@ -6,7 +6,7 @@
       <h2 class="text-2xl font-bold">Thank you for your order!</h2>
       <p class="text-muted">Your purchase was recorded.</p>
     </div>
-    <ul class="divide-y divide-default rounded-lg border border-default text-left">
+    <ul class="divide-y divide-default text-left">
       <li v-for="i in items" :key="i.product_id" class="flex items-center justify-between gap-3 p-3 text-sm">
         <span class="min-w-0 truncate">{{ i.quantity }} × {{ i.name }}</span>
         <span class="font-medium">{{ formatPrice(lineTotal(i)) }}</span>

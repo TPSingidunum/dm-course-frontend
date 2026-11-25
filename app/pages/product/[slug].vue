@@ -7,13 +7,13 @@
 
       <!-- Buy box sits right under the image on mobile and in the right column on desktop. -->
       <aside class="min-w-0 lg:col-start-3 lg:row-span-2 lg:row-start-1">
-        <div class="space-y-4 rounded-lg border border-default p-5 lg:sticky lg:top-20">
+        <div class="space-y-4 rounded-lg bg-elevated/40 p-5 lg:sticky lg:top-20">
           <UBadge color="error">Sale</UBadge>
           <h1 class="text-2xl font-bold" data-testid="product-name">{{ data.name }}</h1>
           <p class="text-2xl font-bold" data-testid="product-price">{{ formatPrice(data.price) }}</p>
           <div class="flex flex-col gap-2">
             <UButton block @click="cart.add(data)">Add to cart</UButton>
-            <UButton :to="`/buy/${data.slug}`" block variant="outline">Buy now</UButton>
+            <UButton :to="`/buy/${data.slug}`" block color="neutral" variant="outline">Buy now</UButton>
             <template v-if="inCart">
               <UButton to="/checkout" block color="neutral" variant="soft">Go to checkout ({{ inCart.quantity }} in cart)</UButton>
               <UButton block color="neutral" variant="ghost" @click="cart.remove(data.product_id)">Remove from cart</UButton>

@@ -21,8 +21,8 @@
 
     <div class="flex flex-wrap gap-3">
       <UButton to="/shop">Shop</UButton>
-      <UButton to="/category" variant="outline">Categories</UButton>
-      <UButton to="/search" variant="outline">Search</UButton>
+      <UButton to="/category" color="neutral" variant="outline">Categories</UButton>
+      <UButton to="/search" color="neutral" variant="outline">Search</UButton>
     </div>
   </StorePage>
 </template>

@@ -3,9 +3,9 @@
   <StorePage title="Shop">
     <div class="flex flex-wrap items-center gap-x-4 gap-y-3">
       <div class="flex items-center gap-2">
-        <UButton :variant="mode === 'default' ? 'solid' : 'outline'" @click="setMode('default')">Default</UButton>
+        <UButton :color="mode === 'default' ? 'primary' : 'neutral'" :variant="mode === 'default' ? 'solid' : 'outline'" @click="setMode('default')">Default</UButton>
         <UButton
-          :variant="mode === 'personalized' ? 'solid' : 'outline'" :disabled="!recIds.length"
+          :color="mode === 'personalized' ? 'primary' : 'neutral'" :variant="mode === 'personalized' ? 'solid' : 'outline'" :disabled="!recIds.length"
           data-testid="personalized-toggle" @click="setMode('personalized')">Personalized</UButton>
       </div>
       <UInput v-model.number="userId" type="number" class="w-28" aria-label="User id" @change="loadRecs" />

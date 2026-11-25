@@ -26,7 +26,7 @@
     <div class="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 lg:grid-cols-3">
       <UPageCard
         v-for="s in sections" :key="s.to" :to="s.to" :icon="s.icon" :title="s.title" :description="s.description"
-        variant="outline" />
+        variant="soft" />
     </div>
   </AdminPage>
 </template>

@@ -2,7 +2,7 @@
 <template>
   <article
     ref="root"
-    class="group flex h-full flex-col overflow-hidden rounded-lg border border-default bg-default transition duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+    class="group flex h-full flex-col overflow-hidden rounded-lg bg-default shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-lg">
     <NuxtLink :to="`/product/${product.slug}`" class="flex flex-1 flex-col" @click="emit('open')">
       <div class="relative aspect-[4/3] w-full bg-elevated" :class="{ 'animate-pulse': !loaded && product.img_url }">
         <NuxtImg

@@ -4,7 +4,7 @@
     <OrderSuccess v-if="order" :items="order" />
 
     <div v-else class="grid gap-6 lg:grid-cols-3">
-      <div class="flex flex-wrap items-center gap-4 rounded-lg border border-default p-4 lg:col-span-2">
+      <div class="flex flex-wrap items-center gap-4 rounded-lg bg-elevated/40 p-4 lg:col-span-2">
         <div class="size-28 shrink-0 overflow-hidden rounded-md bg-elevated">
           <NuxtImg :src="product.img_url" :alt="product.name" class="size-full object-contain" />
         </div>
@@ -16,7 +16,7 @@
         <UInputNumber v-model="quantity" :min="1" :max="99" class="w-32" aria-label="Quantity" />
       </div>
 
-      <aside class="h-fit space-y-4 rounded-lg border border-default p-5 lg:sticky lg:top-20">
+      <aside class="h-fit space-y-4 rounded-lg bg-elevated/40 p-5 lg:sticky lg:top-20">
         <h2 class="text-lg font-semibold">Order summary</h2>
         <dl class="space-y-2 text-sm">
           <div class="flex justify-between"><dt class="text-muted">{{ quantity }} × {{ product.name }}</dt><dd>{{ formatPrice(total) }}</dd></div>

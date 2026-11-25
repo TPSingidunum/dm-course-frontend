@@ -12,7 +12,7 @@
     </EmptyState>
 
     <div v-else class="grid gap-6 lg:grid-cols-3">
-      <ul class="divide-y divide-default rounded-lg border border-default lg:col-span-2" data-testid="cart-items">
+      <ul class="divide-y divide-default lg:col-span-2" data-testid="cart-items">
         <li v-for="item in cart.items.value" :key="item.product_id" class="flex flex-wrap items-center gap-4 p-4">
           <NuxtLink :to="`/product/${item.slug}`" class="size-20 shrink-0 overflow-hidden rounded-md bg-elevated">
             <NuxtImg :src="item.img_url" :alt="item.name" class="size-full object-contain" />
@@ -31,7 +31,7 @@
         </li>
       </ul>
 
-      <aside class="h-fit space-y-4 rounded-lg border border-default p-5 lg:sticky lg:top-20">
+      <aside class="h-fit space-y-4 rounded-lg bg-elevated/40 p-5 lg:sticky lg:top-20">
         <h2 class="text-lg font-semibold">Order summary</h2>
         <dl class="space-y-2 text-sm">
           <div class="flex justify-between"><dt class="text-muted">Items</dt><dd>{{ cart.count.value }}</dd></div>
