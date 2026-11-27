@@ -45,7 +45,7 @@ function setMode(m: 'default' | 'personalized') { mode.value = m }
 
 async function loadRecs() {
   setDemoUserId(userId.value)
-  const r = await mlGet<RecList>(`/recommendations/${userId.value}?limit=10`)
+  const r = await mlGet<RecList>(`/recommendations/user/${userId.value}?limit=10`)
   if (!r) {
     recIds.value = []
     recNote.value = 'ML API unavailable — default order'

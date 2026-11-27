@@ -1,8 +1,5 @@
-<<<<<<< HEAD
-=======
 -- Local schema for the frontend (MariaDB/MySQL 8 compatible). Matches the Drizzle schemas in
 -- server/database/schemas/*.ts and the Day 1 event schema (12 fields).
->>>>>>> 06afa2574dbf53b120e8e202fc98f082b83dc7d7
 SET NAMES utf8mb4;
 DROP TABLE IF EXISTS `event`;
 DROP TABLE IF EXISTS product;
@@ -42,12 +39,8 @@ CREATE TABLE product (
   INDEX idx_product_category (category_id)
 );
 
-<<<<<<< HEAD
-CREATE TABLE `event` (
-=======
 -- Day 1: extended event table (the old event_type/user_session/product_id fields remain)
-CREATE TABLE event (
->>>>>>> 06afa2574dbf53b120e8e202fc98f082b83dc7d7
+CREATE TABLE `event` (
   event_id INT PRIMARY KEY AUTO_INCREMENT,
   event_type VARCHAR(50) NOT NULL,
   user_id INT NULL,

@@ -17,7 +17,8 @@ export interface SeoResult extends FallbackInfo {
 }
 
 export interface Campaign extends Row {
-  campaign_id: number
+  id: number
+  campaign_id?: number
   name: string
   target_segments?: string[]
   eligible_buckets?: string[]
@@ -25,7 +26,8 @@ export interface Campaign extends Row {
 
 // Campaign as shown in the table (list fields joined into strings).
 export interface CampaignRow extends Row {
-  campaign_id: number
+  id: number
+  campaign_id?: number
   name: string
   target_segments: string
   eligible_buckets: string

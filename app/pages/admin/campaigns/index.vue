@@ -3,7 +3,8 @@
   <AdminPage title="Campaigns">
     <MlUnavailable v-if="down" :retry="loadCampaigns" />
     <AdminSection v-else title="All campaigns" description="Targeting rules per campaign.">
-      <AdminTable :data="campaigns" :columns="campaignCols" data-testid="campaigns-table" />
+      <!-- :key re-mounts the table when the list arrives (UTable does not pick up the new array otherwise) -->
+      <AdminTable :key="campaigns.length" :data="campaigns" :columns="campaignCols" data-testid="campaigns-table" />
     </AdminSection>
 
     <AdminSection title="Recommended audience" description="Who should receive the selected campaign.">
@@ -70,11 +71,11 @@ const mode = ref<'ml' | 'rule'>('ml')
 const audience = ref<Audience | null>(null)
 const comparison = ref<TargetingComparison | null>(null)
 
-const campaignCols = columnsFor(['campaign_id', 'name', 'target_segments', 'eligible_buckets', 'min_probability', 'cost_per_contact', 'max_contacts'])
+const campaignCols = columnsFor(['id', 'name', 'channel', 'min_probability', 'contact_cost', 'budget', 'max_contacts'])
 const audienceCols = columnsFor(['rank', 'user_id', 'probability', 'segment', 'rfm_bucket', 'monetary', 'score', 'why'])
 const comparisonCols = columnsFor(['mode', 'size', 'expected_conversions', 'expected_profit', 'avg_probability'])
 
-const options = computed(() => campaigns.value.map(c => ({ label: c.name, value: c.campaign_id })))
+const options = computed(() => campaigns.value.map(c => ({ label: c.name, value: c.id })))
 const audienceRows = computed(() => (audience.value?.audience || []).map(a => ({ ...a, why: (a.reasons || []).join('; ') })))
 const comparisonRows = computed(() => {
   const metrics = comparison.value?.metrics
