@@ -181,4 +181,9 @@ export interface SeoResponse {
   title: string
   description: string
   keywords: string[]
+  // Day 7: extra fields from the AI SEO agent (dm-course-backend POST /seo/generate/product)
+  product_description?: string
+  model?: string
+  attempts?: number
+  fallback?: boolean
 }
